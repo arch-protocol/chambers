@@ -1,0 +1,14 @@
+name: Chamber Integration Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  integration-tests-chamber:
+    uses: ./.github/workflows/tests-template.yml
+    with:
+      make-command: test-chamber-integration-mainnet-fork
+    secrets: inherit

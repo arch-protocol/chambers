@@ -1,0 +1,14 @@
+name: Streaming Fee Wizard Integration Tests
+
+on:
+  push:
+    branches: 
+      - main
+  pull_request:
+
+jobs:
+  integration-tests-fees:
+    uses: ./.github/workflows/tests-template.yml
+    with:
+      make-command: test-streaming-fee-wizard-integration-mainnet-fork
+    secrets: inherit

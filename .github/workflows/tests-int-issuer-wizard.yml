@@ -1,0 +1,14 @@
+name: Issuer Wizard Integration Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  integration-tests-issuer:
+    uses: ./.github/workflows/tests-template.yml
+    with:
+      make-command: test-issuer-wizard-integration-mainnet-fork
+    secrets: inherit

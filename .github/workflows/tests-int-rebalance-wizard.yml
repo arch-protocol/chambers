@@ -1,0 +1,14 @@
+name: Rebalancer Wizard Integration Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  integration-tests-rebalancer:
+    uses: ./.github/workflows/tests-template.yml
+    with:
+      make-command: test-rebalance-wizard-integration-mainnet-fork
+    secrets: inherit

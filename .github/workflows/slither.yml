@@ -1,0 +1,42 @@
+name: Slither Analysis
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+
+      - name: Cache or restore cached dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install forge libraries
+        run: make install
+      
+      - name: Run Slither
+        uses: crytic/slither-action@v0.2.0
+        with:
+          node-version: 16.18.0
+          fail-on: medium
+          slither-args: --filter-paths "lib/|test/|script/" --exclude-low
+        

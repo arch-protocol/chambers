@@ -1,0 +1,14 @@
+name: Trade Issuer Integration Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  integration-tests-trade-issuer:
+    uses: ./.github/workflows/tests-template.yml
+    with:
+      make-command: test-trade-issuer-integration-mainnet-fork
+    secrets: inherit

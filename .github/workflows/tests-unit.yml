@@ -1,0 +1,14 @@
+name: Unit Tests
+
+on:
+  push:
+    branches:
+      - main 
+  pull_request:
+
+jobs:
+  unit-tests:
+    uses: ./.github/workflows/tests-template.yml
+    with:
+      make-command: test-unit-mainnet-fork
+    secrets: inherit
