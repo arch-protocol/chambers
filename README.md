@@ -10,6 +10,8 @@
 
 This repository contains the core smart contracts for the Arch Chambers.
 
+#### Full documentation [here](https://docs.arch.finance/chambers/)
+
 ## About Arch
 
 Arch is a decentralized finance (DeFi) asset manager that enables passive investment in the decentralized (Web3) economy. 
@@ -17,7 +19,6 @@ Arch is a decentralized finance (DeFi) asset manager that enables passive invest
 We curate a comprehensive family of market indices and tokenized products and help investors build and manage their Web3 portfolios. In other words, Arch is Blackrock and Wealthfront for Web3. We are a small team committed to pooling capital on Web3.
 
 ## Core contracts overview
-[docs](https://docs.arch.finance/chambers/smart-contracts-overview)
 
 The objective of the following contracts is to create an ERC20 fungible product, that act as an index or ETF, capable of wrapping any token as long as they are compliant with ERC20 standard.
 
@@ -38,8 +39,6 @@ Like every other index or ETF, the composition of it may need changes. With the 
 ### Streaming Fee Wizard
 
 The main objective of the Streaming Fee wizard is to give the ability of charge fees of any chamber. This creates a little of inflation (creating supply). It's configured by the managers of the Chamber. This is the only way a manager of a Chamber can charge fees using the core contracts. 
-
-## Full documentation [here](https://docs.arch.finance/chambers/)
 
 ## Licensing
 The primary license for Arch Chambers core contracts is Apache 2.0
