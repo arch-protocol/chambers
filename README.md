@@ -14,32 +14,40 @@ This repository contains the core smart contracts for the Arch Chambers.
 
 ## About Arch
 
-Arch is a decentralized finance (DeFi) asset manager that enables passive investment in the decentralized (Web3) economy. 
+Arch is a decentralized finance (DeFi) asset manager that enables passive investment in the decentralized (Web3) economy.
 
-We curate a comprehensive family of market indices and tokenized products and help investors build and manage their Web3 portfolios. In other words, Arch is Blackrock and Wealthfront for Web3. We are a small team committed to pooling capital on Web3.
+We curate a comprehensive family of market indices and tokenized products to help investors build and manage their Web3 portfolios. 
 
 ## Core contracts overview
 
-The objective of the following contracts is to create an ERC20 fungible product, that act as an index or ETF, capable of wrapping any token as long as they are compliant with ERC20 standard.
+The core contracts aim to create an ERC20 fungible product collateralized by other ERC20 tokens acting as an index capable of wrapping any token as long as they comply with the ERC20 standard.
 
 ### Chamber
 
-A chamber is an index or ETF by itself. It is responsible for handling ERC20 logic like minting and burning tokens, but more importantly, save the data about which assets it holds and the proportion of them on each unit of the chamber token. This contract holds the assets. 
+A Chamber is a tokenized product collateralized by other ERC20 tokens. It's responsible for storing the data about the assets it holds and the proportion each represents.
 
-In order to update the inner states of a Chamber, Wizards there are different contracts from the core that can be used.
+The Chamber is also responsible for minting and burning new units. These functions are exposed to a set of Wizards accountable for validating the logic and adequately using the Chamber logic.
+
+If the composition of the Chamber needs to be updated, developers can use Wizards to make trades using the underlying assets held by the Chamber.
 
 ### Issuer Wizard 
 
-This contract is the one in charge of the mint/redeem operations of the Chamber. There's no way to mint or redeem a Chamber token directly using the Chamber contract.
+The Issuer Wizard is in charge of minting and redeeming tokens keeping the composition of underlying assets per unit constant. When tokens are minted or redeemed using this contract, the composition of the underlying assets per unit on the Chamber remains.
 
 ### Rebalancer Wizard
 
-Like every other index or ETF, the composition of it may need changes. With the rebalancer, the underlying assets can be traded for others in order to change the composition of the chamber. Trades and composition changes can only be performed using this contract.
+The Rebalancer Wizard allows rebalancing of the composition of underlying assets making a smart-contract transaction previously calculated off-chain. The target can be any contract as long as they're marked as allowed both in the wizard and in the Chamber God.
 
 ### Streaming Fee Wizard
 
-The main objective of the Streaming Fee wizard is to give the ability of charge fees of any chamber. This creates a little of inflation (creating supply). It's configured by the managers of the Chamber. This is the only way a manager of a Chamber can charge fees using the core contracts. 
+The Streaming Fee Wizard takes advantage of the minting function of the Chamber to charge streaming fees. It's responsible for only collecting the proportion established for each Chamber.
+
+### Chamber God
+
+To create new chambers, developers need to use the Chamber God contract. Anyone can build a new Chamber and manage it on their own.
 
 ## Licensing
-The primary license for Arch Chambers core contracts is Apache 2.0
+
+The primary license for Arch Chambers Core Contracts is Apache 2.0.
+
 
