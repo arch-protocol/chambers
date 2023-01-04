@@ -5,7 +5,7 @@ pragma solidity ^0.8.13.0;
 import "forge-std/Test.sol";
 import {ArrayUtils} from "../../../src/lib/ArrayUtils.sol";
 
-contract RemoveTest is Test {
+contract ArrayUtilsUnitRemoveTest is Test {
     using ArrayUtils for address[];
 
     /*//////////////////////////////////////////////////////////////

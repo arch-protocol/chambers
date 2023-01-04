@@ -10,7 +10,7 @@ import {IIssuerWizard} from "../../../src/interfaces/IIssuerWizard.sol";
 import {IssuerWizard} from "../../../src/IssuerWizard.sol";
 import {PreciseUnitMath} from "../../../src/lib/PreciseUnitMath.sol";
 
-contract IssuerWizardTest is Test {
+contract IssuerWizardUnitIssueTest is Test {
     using PreciseUnitMath for uint256;
 
     /*//////////////////////////////////////////////////////////////

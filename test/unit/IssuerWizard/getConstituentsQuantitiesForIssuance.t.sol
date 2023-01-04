@@ -8,7 +8,7 @@ import {IChamber} from "../../../src/interfaces/IChamber.sol";
 import {IssuerWizard} from "../../../src/IssuerWizard.sol";
 import {PreciseUnitMath} from "../../../src/lib/PreciseUnitMath.sol";
 
-contract IssuerWizardTest is Test {
+contract IssuerWizardUnitGetConstituentsQuantitiesForIssuanceTest is Test {
     using PreciseUnitMath for uint256;
 
     /*//////////////////////////////////////////////////////////////

@@ -5,7 +5,7 @@ pragma solidity ^0.8.13.0;
 import "forge-std/Test.sol";
 import {ArrayUtils} from "../../../src/lib/ArrayUtils.sol";
 
-contract IndexOfTest is Test {
+contract ArrayUtilsUnitIndexOfTest is Test {
     using ArrayUtils for address[];
 
     /*//////////////////////////////////////////////////////////////
