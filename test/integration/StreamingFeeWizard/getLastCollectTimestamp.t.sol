@@ -9,7 +9,7 @@ import {Chamber} from "../../../src/Chamber.sol";
 import {ChamberFactory} from "../../utils/factories.sol";
 import {StreamingFeeWizard} from "../../../src/StreamingFeeWizard.sol";
 
-contract StreamingFeeWizardIntegrationLastCollectTimestampTest is Test {
+contract StreamingFeeWizardIntegrationGetLastCollectTimestampTest is Test {
     /*//////////////////////////////////////////////////////////////
                               VARIABLES
     //////////////////////////////////////////////////////////////*/

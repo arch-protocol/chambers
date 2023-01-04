@@ -5,7 +5,7 @@ pragma solidity ^0.8.17.0;
 import "forge-std/Test.sol";
 import {PreciseUnitMath} from "../../../src/lib/PreciseUnitMath.sol";
 
-contract PreciseMulTest is Test {
+contract PreciseUnitMathUnitPreciseMulTest is Test {
     using PreciseUnitMath for uint256;
 
     /**

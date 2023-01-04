@@ -19,7 +19,7 @@ contract EvilSaruman {
     }
 }
 
-contract ChamberUpdateQuantitiesTest is Test {
+contract ChamberIntegrationUpdateQuantitiesTest is Test {
     using PreciseUnitMath for uint256;
 
     /*//////////////////////////////////////////////////////////////

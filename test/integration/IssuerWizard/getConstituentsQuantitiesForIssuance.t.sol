@@ -11,7 +11,7 @@ import {Chamber} from "../../../src/Chamber.sol";
 import {ChamberFactory} from "../../utils/factories.sol";
 import {PreciseUnitMath} from "../../../src/lib/PreciseUnitMath.sol";
 
-contract IssuerWizardGetConstituentsQuantitiesForIssuanceTest is Test {
+contract IssuerWizardIntegrationGetConstituentsQuantitiesForIssuanceTest is Test {
     using PreciseUnitMath for uint256;
 
     /*//////////////////////////////////////////////////////////////
