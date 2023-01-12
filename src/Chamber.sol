@@ -35,10 +35,11 @@ import {Owned} from "solmate/auth/Owned.sol";
 import {ReentrancyGuard} from "solmate/utils/ReentrancyGuard.sol";
 import {ArrayUtils} from "./lib/ArrayUtils.sol";
 import {IChamberGod} from "./interfaces/IChamberGod.sol";
+import {IChamber} from "./interfaces/IChamber.sol";
 import {PreciseUnitMath} from "./lib/PreciseUnitMath.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
-contract Chamber is Owned, ReentrancyGuard, ERC20 {
+contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
     /*//////////////////////////////////////////////////////////////
                                  CONSTANTS
     //////////////////////////////////////////////////////////////*/
@@ -53,26 +54,6 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
     using SafeERC20 for IERC20;
     using Address for address;
     using PreciseUnitMath for uint256;
-
-    /*//////////////////////////////////////////////////////////////
-                                 EVENTS
-    //////////////////////////////////////////////////////////////*/
-
-    event ManagerAdded(address indexed _manager);
-
-    event ManagerRemoved(address indexed _manager);
-
-    event ConstituentAdded(address indexed _constituent);
-
-    event ConstituentRemoved(address indexed _constituent);
-
-    event WizardAdded(address indexed _wizard);
-
-    event WizardRemoved(address indexed _wizard);
-
-    event AllowedContractAdded(address indexed _allowedContract);
-
-    event AllowedContractRemoved(address indexed _allowedContract);
 
     /*//////////////////////////////////////////////////////////////
                             CHAMBER STORAGE
@@ -147,7 +128,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      *
      * @param _constituent The address of the constituent to add
      */
-    function addConstituent(address _constituent) external onlyWizard {
+    function addConstituent(address _constituent) external override onlyWizard {
         require(!isConstituent(_constituent), "Must not be constituent");
 
         constituents.push(_constituent);
@@ -160,7 +141,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      *
      * @param _constituent The address of the constituent to remove
      */
-    function removeConstituent(address _constituent) external onlyWizard {
+    function removeConstituent(address _constituent) external override onlyWizard {
         require(isConstituent(_constituent), "Must be constituent");
 
         constituents.removeStorage(_constituent);
@@ -175,7 +156,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      *
      * @return bool True/False if the address is a manager or not
      */
-    function isManager(address _manager) public view returns (bool) {
+    function isManager(address _manager) public view override returns (bool) {
         return managers.contains(_manager);
     }
 
@@ -186,7 +167,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      *
      * @return bool True/False if the address is a wizard or not
      */
-    function isWizard(address _wizard) public view returns (bool) {
+    function isWizard(address _wizard) public view override returns (bool) {
         return wizards.contains(_wizard);
     }
 
@@ -197,7 +178,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      *
      * @return bool True/False if the address is a constituent or not
      */
-    function isConstituent(address _constituent) public view returns (bool) {
+    function isConstituent(address _constituent) public view override returns (bool) {
         return constituents.contains(_constituent);
     }
 
@@ -206,7 +187,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      *
      * @param _manager The address of the manager to add
      */
-    function addManager(address _manager) external onlyOwner {
+    function addManager(address _manager) external override onlyOwner {
         require(!isManager(_manager), "Already manager");
         require(_manager != address(0), "Cannot add null address");
 
@@ -220,7 +201,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      *
      * @param _manager The address of the manager to remove
      */
-    function removeManager(address _manager) external onlyOwner {
+    function removeManager(address _manager) external override onlyOwner {
         require(isManager(_manager), "Not a manager");
 
         managers.removeStorage(_manager);
@@ -233,7 +214,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      *
      * @param _wizard The address of the wizard to add
      */
-    function addWizard(address _wizard) external onlyManager {
+    function addWizard(address _wizard) external override onlyManager {
         require(god.isWizard(_wizard), "Wizard not validated in ChamberGod");
         require(!isWizard(_wizard), "Wizard already in Chamber");
 
@@ -247,7 +228,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      *
      * @param _wizard The address of the wizard to remove
      */
-    function removeWizard(address _wizard) external onlyManager {
+    function removeWizard(address _wizard) external override onlyManager {
         require(isWizard(_wizard), "Wizard not in chamber");
 
         wizards.removeStorage(_wizard);
@@ -261,7 +242,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      *
      * @return an array of addresses for the constituents
      */
-    function getConstituentsAddresses() external view returns (address[] memory) {
+    function getConstituentsAddresses() external view override returns (address[] memory) {
         return constituents;
     }
 
@@ -271,7 +252,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      *
      * @return an array of uint256 for the quantities of the constituents
      */
-    function getQuantities() external view returns (uint256[] memory) {
+    function getQuantities() external view override returns (uint256[] memory) {
         uint256[] memory quantities = new uint256[](constituents.length);
         for (uint256 i = 0; i < constituents.length; i++) {
             quantities[i] = constituentQuantities[constituents[i]];
@@ -287,7 +268,12 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      *
      * @return uint256 The quantity of the constituent
      */
-    function getConstituentQuantity(address _constituent) external view returns (uint256) {
+    function getConstituentQuantity(address _constituent)
+        external
+        view
+        override
+        returns (uint256)
+    {
         return constituentQuantities[_constituent];
     }
 
@@ -296,7 +282,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      *
      * @return address[] Array containing the addresses of the wizards of the Chamber
      */
-    function getWizards() external view returns (address[] memory) {
+    function getWizards() external view override returns (address[] memory) {
         return wizards;
     }
 
@@ -305,7 +291,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      *
      * @return address[] Array containing the addresses of the managers of the Chamber
      */
-    function getManagers() external view returns (address[] memory) {
+    function getManagers() external view override returns (address[] memory) {
         return managers;
     }
 
@@ -314,7 +300,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      *
      * @return address[] Array containing the addresses of the allowedContracts of the Chamber
      */
-    function getAllowedContracts() external view returns (address[] memory) {
+    function getAllowedContracts() external view override returns (address[] memory) {
         return allowedContracts;
     }
 
@@ -323,7 +309,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      *
      * @param _target The address of the allowedContract to add
      */
-    function addAllowedContract(address _target) external onlyManager {
+    function addAllowedContract(address _target) external override onlyManager {
         require(god.isAllowedContract(_target), "Contract not allowed in ChamberGod");
         require(!isAllowedContract(_target), "Contract already allowed");
 
@@ -337,7 +323,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      *
      * @param _target The address of the allowedContract to remove
      */
-    function removeAllowedContract(address _target) external onlyManager {
+    function removeAllowedContract(address _target) external override onlyManager {
         require(isAllowedContract(_target), "Contract not allowed");
 
         allowedContracts.removeStorage(_target);
@@ -352,7 +338,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      *
      * @return bool True/False if the address is an allowedContract or not
      */
-    function isAllowedContract(address _target) public view returns (bool) {
+    function isAllowedContract(address _target) public view override returns (bool) {
         return allowedContracts.contains(_target);
     }
 
@@ -367,7 +353,12 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      * @param _recipient   The address of the recipient
      * @param _quantity    The quantity of the chamber to mint
      */
-    function mint(address _recipient, uint256 _quantity) external onlyWizard nonReentrant {
+    function mint(address _recipient, uint256 _quantity)
+        external
+        override
+        onlyWizard
+        nonReentrant
+    {
         _mint(_recipient, _quantity);
     }
 
@@ -378,7 +369,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      * @param _from          The address of the source to burn from
      * @param _quantity      The quantity of the chamber tokens to burn
      */
-    function burn(address _from, uint256 _quantity) external onlyWizard nonReentrant {
+    function burn(address _from, uint256 _quantity) external override onlyWizard nonReentrant {
         _burn(_from, _quantity);
     }
 
@@ -392,6 +383,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      */
     function withdrawTo(address _constituent, address _recipient, uint256 _quantity)
         external
+        override
         onlyWizard
     {
         if (_quantity > 0) {
@@ -418,7 +410,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
      * list. Used by wizards. E.g. after an uncollateralized mint in the streaming fee wizard .
      *
      */
-    function updateQuantities() external onlyWizard nonReentrant {
+    function updateQuantities() external override onlyWizard nonReentrant {
         uint256 totalSupply = IERC20(address(this)).totalSupply();
         uint256 decimals = ERC20(address(this)).decimals();
         for (uint256 i = 0; i < constituents.length; i++) {
@@ -453,7 +445,7 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
         uint256 _minBuyQuantity,
         bytes memory _data,
         address payable _target
-    ) external onlyWizard returns (uint256 tokenAmountBought) {
+    ) external override onlyWizard returns (uint256 tokenAmountBought) {
         require(_target != address(this), "Cannot invoke the Chamber");
         require(isAllowedContract(_target), "Target not allowed");
         uint256 tokenAmountBefore = IERC20(_buyToken).balanceOf(address(this));

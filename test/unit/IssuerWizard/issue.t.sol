@@ -109,9 +109,11 @@ contract IssuerWizardUnitIssueTest is Test {
 
         uint256 currentChamberBalance = IERC20(token1).balanceOf(chamberAddress);
         vm.mockCall(
-            chamberAddress, abi.encodeWithSelector(chamber.balanceOf.selector, alice), abi.encode(0)
+            chamberAddress,
+            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, alice),
+            abi.encode(0)
         );
-        assertEq(chamber.balanceOf(alice), 0);
+        assertEq(IERC20(address(chamber)).balanceOf(alice), 0);
         assertEq(currentChamberBalance, previousChamberBalance);
         assertEq(IERC20(token1).balanceOf(alice), requiredToken1Collateral);
     }
@@ -164,9 +166,11 @@ contract IssuerWizardUnitIssueTest is Test {
 
         uint256 currentChamberBalance = IERC20(token1).balanceOf(chamberAddress);
         vm.mockCall(
-            chamberAddress, abi.encodeWithSelector(chamber.balanceOf.selector, alice), abi.encode(0)
+            chamberAddress,
+            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, alice),
+            abi.encode(0)
         );
-        assertEq(chamber.balanceOf(alice), 0);
+        assertEq(IERC20(address(chamber)).balanceOf(alice), 0);
         assertEq(currentChamberBalance, previousChamberBalance);
         assertEq(IERC20(token1).balanceOf(alice), requiredToken1Collateral);
     }
@@ -219,9 +223,11 @@ contract IssuerWizardUnitIssueTest is Test {
 
         uint256 currentChamberBalance = IERC20(token1).balanceOf(chamberAddress);
         vm.mockCall(
-            chamberAddress, abi.encodeWithSelector(chamber.balanceOf.selector, alice), abi.encode(0)
+            chamberAddress,
+            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, alice),
+            abi.encode(0)
         );
-        assertEq(chamber.balanceOf(alice), 0);
+        assertEq(IERC20(address(chamber)).balanceOf(alice), 0);
         assertEq(currentChamberBalance, previousChamberBalance);
         assertEq(IERC20(token1).balanceOf(alice), requiredToken1Collateral - 1);
     }
@@ -288,9 +294,11 @@ contract IssuerWizardUnitIssueTest is Test {
         uint256 currentToken1ChamberBalance = IERC20(token1).balanceOf(chamberAddress);
         uint256 currentToken2ChamberBalance = IERC20(token2).balanceOf(chamberAddress);
         vm.mockCall(
-            chamberAddress, abi.encodeWithSelector(chamber.balanceOf.selector, alice), abi.encode(0)
+            chamberAddress,
+            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, alice),
+            abi.encode(0)
         );
-        assertEq(chamber.balanceOf(alice), 0);
+        assertEq(IERC20(address(chamber)).balanceOf(alice), 0);
         assertEq(currentToken1ChamberBalance, previousToken1ChamberBalance);
         assertEq(currentToken2ChamberBalance, previousToken2ChamberBalance);
         assertEq(IERC20(token1).balanceOf(alice), requiredToken1Collateral);
@@ -417,10 +425,10 @@ contract IssuerWizardUnitIssueTest is Test {
         uint256 currentChamberBalance = IERC20(token1).balanceOf(chamberAddress);
         vm.mockCall(
             chamberAddress,
-            abi.encodeWithSelector(chamber.balanceOf.selector, alice),
+            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, alice),
             abi.encode(quantityToMint)
         );
-        assertEq(chamber.balanceOf(alice), quantityToMint);
+        assertEq(IERC20(address(chamber)).balanceOf(alice), quantityToMint);
         assertEq(currentChamberBalance, previousChamberBalance + requiredToken1Collateral);
         assertEq(IERC20(token1).balanceOf(alice), 0);
     }
@@ -500,10 +508,10 @@ contract IssuerWizardUnitIssueTest is Test {
         uint256 currentToken2ChamberBalance = IERC20(token2).balanceOf(chamberAddress);
         vm.mockCall(
             chamberAddress,
-            abi.encodeWithSelector(chamber.balanceOf.selector, alice),
+            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, alice),
             abi.encode(quantityToMint)
         );
-        assertEq(chamber.balanceOf(alice), quantityToMint);
+        assertEq(IERC20(address(chamber)).balanceOf(alice), quantityToMint);
         assertEq(
             currentToken1ChamberBalance, previousToken1ChamberBalance + requiredToken1Collateral
         );

@@ -28,9 +28,7 @@
  */
 pragma solidity ^0.8.17.0;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
-interface IChamber is IERC20 {
+interface IChamber {
     /*//////////////////////////////////////////////////////////////
                                  EVENTS
     //////////////////////////////////////////////////////////////*/
@@ -46,6 +44,10 @@ interface IChamber is IERC20 {
     event WizardAdded(address indexed _wizard);
 
     event WizardRemoved(address indexed _wizard);
+
+    event AllowedContractAdded(address indexed _allowedContract);
+
+    event AllowedContractRemoved(address indexed _allowedContract);
 
     /*//////////////////////////////////////////////////////////////
                                CHAMBER MANAGEMENT
