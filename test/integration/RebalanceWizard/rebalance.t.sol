@@ -6,6 +6,7 @@ import {Chamber} from "src/Chamber.sol";
 import {ArrayUtils} from "src/lib/ArrayUtils.sol";
 import {IssuerWizard} from "src/IssuerWizard.sol";
 import {RebalanceWizard} from "src/RebalanceWizard.sol";
+import {IRebalanceWizard} from "src/interfaces/IRebalanceWizard.sol";
 import {IChamber} from "src/interfaces/IChamber.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ChamberTestUtils} from "test/utils/ChamberTestUtils.sol";
@@ -96,7 +97,7 @@ contract RebalanceWizardIntegrationRebalanceTest is ChamberTestUtils {
      *  - Deposit USDT into yvUSDT vault in yearn
      */
     function testRebalanceWithdrawTradeDeposit() public {
-        RebalanceWizard.RebalanceParams[] memory trades = new RebalanceWizard.RebalanceParams[](3);
+        IRebalanceWizard.RebalanceParams[] memory trades = new IRebalanceWizard.RebalanceParams[](3);
         // Data for the first trade (withdraw USDC from yvUSDC)
         uint256 sharesToSell = 100e6;
         bytes memory data = abi.encodeWithSignature("pricePerShare()");
@@ -108,7 +109,7 @@ contract RebalanceWizardIntegrationRebalanceTest is ChamberTestUtils {
         uint256 expectedUSDC = sharesToSell.preciseMul(price, 6);
 
         data = abi.encodeWithSignature("withdraw(uint256)", sharesToSell);
-        RebalanceWizard.RebalanceParams memory withdrawParams = RebalanceWizard.RebalanceParams(
+        IRebalanceWizard.RebalanceParams memory withdrawParams = IRebalanceWizard.RebalanceParams(
             chamber, yvUSDC, sharesToSell, usdc, expectedUSDC, payable(yvUSDC), data
         );
         trades[0] = withdrawParams;
@@ -117,7 +118,7 @@ contract RebalanceWizardIntegrationRebalanceTest is ChamberTestUtils {
         (bytes memory quotes, uint256 buyAmount, address target) =
             getCompleteQuoteData(usdc, expectedUSDC, usdt);
 
-        RebalanceWizard.RebalanceParams memory swapParams = RebalanceWizard.RebalanceParams(
+        IRebalanceWizard.RebalanceParams memory swapParams = IRebalanceWizard.RebalanceParams(
             chamber, usdc, expectedUSDC, usdt, buyAmount, payable(target), quotes
         );
         trades[1] = swapParams;
@@ -133,7 +134,7 @@ contract RebalanceWizardIntegrationRebalanceTest is ChamberTestUtils {
         expectedShares = expectedShares * 995 / 1000;
 
         data = abi.encodeWithSignature("deposit(uint256)", buyAmount);
-        RebalanceWizard.RebalanceParams memory depositParams = RebalanceWizard.RebalanceParams(
+        IRebalanceWizard.RebalanceParams memory depositParams = IRebalanceWizard.RebalanceParams(
             chamber, usdt, buyAmount, yvUSDT, expectedShares, payable(yvUSDT), data
         );
         trades[2] = depositParams;

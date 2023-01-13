@@ -280,7 +280,7 @@ contract StreamingFeeWizard is IStreamingFeeWizard, ReentrancyGuard {
         uint256 _streamingFeePercentage
     ) internal nonReentrant returns (uint256 inflationQuantity) {
         // Get chamber supply
-        uint256 currentSupply = IERC20(_chamber).totalSupply();
+        uint256 currentSupply = IERC20(address(_chamber)).totalSupply();
 
         // Calculate inflation quantity
         inflationQuantity = _calculateInflationQuantity(

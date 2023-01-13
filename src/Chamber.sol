@@ -35,10 +35,11 @@ import {Owned} from "solmate/auth/Owned.sol";
 import {ReentrancyGuard} from "solmate/utils/ReentrancyGuard.sol";
 import {ArrayUtils} from "./lib/ArrayUtils.sol";
 import {IChamberGod} from "./interfaces/IChamberGod.sol";
+import {IChamber} from "./interfaces/IChamber.sol";
 import {PreciseUnitMath} from "./lib/PreciseUnitMath.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
-contract Chamber is Owned, ReentrancyGuard, ERC20 {
+contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
     /*//////////////////////////////////////////////////////////////
                                  CONSTANTS
     //////////////////////////////////////////////////////////////*/
@@ -53,26 +54,6 @@ contract Chamber is Owned, ReentrancyGuard, ERC20 {
     using SafeERC20 for IERC20;
     using Address for address;
     using PreciseUnitMath for uint256;
-
-    /*//////////////////////////////////////////////////////////////
-                                 EVENTS
-    //////////////////////////////////////////////////////////////*/
-
-    event ManagerAdded(address indexed _manager);
-
-    event ManagerRemoved(address indexed _manager);
-
-    event ConstituentAdded(address indexed _constituent);
-
-    event ConstituentRemoved(address indexed _constituent);
-
-    event WizardAdded(address indexed _wizard);
-
-    event WizardRemoved(address indexed _wizard);
-
-    event AllowedContractAdded(address indexed _allowedContract);
-
-    event AllowedContractRemoved(address indexed _allowedContract);
 
     /*//////////////////////////////////////////////////////////////
                             CHAMBER STORAGE

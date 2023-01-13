@@ -62,18 +62,20 @@ contract IssuerWizardUnitRedeemTest is Test {
      */
     function testCannotRedeemQuantityZero() public {
         vm.mockCall(
-            chamberAddress, abi.encodeWithSelector(chamber.totalSupply.selector), abi.encode(0)
+            chamberAddress,
+            abi.encodeWithSelector(IERC20(address(chamber)).totalSupply.selector),
+            abi.encode(0)
         );
         vm.mockCall(
             chamberAddress,
-            abi.encodeWithSelector(chamber.balanceOf.selector, (address(this))),
+            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, (address(this))),
             abi.encode(0)
         );
         uint256 previousChamberSupply = IERC20(chamberAddress).totalSupply();
         uint256 previousBalance = IERC20(chamberAddress).balanceOf(address(this));
         vm.mockCall(
             chamberAddress,
-            abi.encodeWithSelector(chamber.balanceOf.selector, (address(this))),
+            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, (address(this))),
             abi.encode(0)
         );
         vm.expectRevert(bytes("Quantity must be greater than 0"));
@@ -81,11 +83,13 @@ contract IssuerWizardUnitRedeemTest is Test {
         issuerWizard.redeem(IChamber(chamberAddress), 0);
 
         vm.mockCall(
-            chamberAddress, abi.encodeWithSelector(chamber.totalSupply.selector), abi.encode(0)
+            chamberAddress,
+            abi.encodeWithSelector(IERC20(address(chamber)).totalSupply.selector),
+            abi.encode(0)
         );
         vm.mockCall(
             chamberAddress,
-            abi.encodeWithSelector(chamber.balanceOf.selector, (address(this))),
+            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, (address(this))),
             abi.encode(0)
         );
         uint256 currentChamberSupply = IERC20(chamberAddress).totalSupply();
@@ -101,18 +105,20 @@ contract IssuerWizardUnitRedeemTest is Test {
     function testCannotRedeemQuantityIsLessThanBalance() public {
         uint256 quantityToRedeem = 20;
         vm.mockCall(
-            chamberAddress, abi.encodeWithSelector(chamber.totalSupply.selector), abi.encode(0)
+            chamberAddress,
+            abi.encodeWithSelector(IERC20(address(chamber)).totalSupply.selector),
+            abi.encode(0)
         );
         vm.mockCall(
             chamberAddress,
-            abi.encodeWithSelector(chamber.balanceOf.selector, (alice)),
+            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, (alice)),
             abi.encode(quantityToRedeem - 1)
         );
         uint256 previousChamberSupply = IERC20(chamberAddress).totalSupply();
         uint256 previousAliceBalance = IERC20(chamberAddress).balanceOf(alice);
         vm.mockCall(
             chamberAddress,
-            abi.encodeWithSelector(chamber.balanceOf.selector, (alice)),
+            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, (alice)),
             abi.encode(quantityToRedeem - 1)
         );
         vm.expectRevert(bytes("Not enough balance to redeem"));
@@ -121,11 +127,13 @@ contract IssuerWizardUnitRedeemTest is Test {
         issuerWizard.redeem(IChamber(chamberAddress), quantityToRedeem);
 
         vm.mockCall(
-            chamberAddress, abi.encodeWithSelector(chamber.totalSupply.selector), abi.encode(0)
+            chamberAddress,
+            abi.encodeWithSelector(IERC20(address(chamber)).totalSupply.selector),
+            abi.encode(0)
         );
         vm.mockCall(
             chamberAddress,
-            abi.encodeWithSelector(chamber.balanceOf.selector, (alice)),
+            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, (alice)),
             abi.encode(quantityToRedeem - 1)
         );
         uint256 currentChamberSupply = IERC20(chamberAddress).totalSupply();
@@ -150,14 +158,14 @@ contract IssuerWizardUnitRedeemTest is Test {
 
         vm.mockCall(
             chamberAddress,
-            abi.encodeWithSelector(chamber.totalSupply.selector),
+            abi.encodeWithSelector(IERC20(address(chamber)).totalSupply.selector),
             abi.encode(quantityToRedeem)
         );
-        uint256 previousChamberSupply = chamber.totalSupply();
+        uint256 previousChamberSupply = IERC20(address(chamber)).totalSupply();
 
         vm.mockCall(
             chamberAddress,
-            abi.encodeWithSelector(chamber.balanceOf.selector, alice),
+            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, alice),
             abi.encode(quantityToRedeem)
         );
         vm.mockCall(
@@ -175,7 +183,7 @@ contract IssuerWizardUnitRedeemTest is Test {
             abi.encodeWithSelector(ERC20(address(chamber)).decimals.selector),
             abi.encode(18)
         );
-        vm.expectCall(chamberAddress, abi.encodeCall(chamber.balanceOf, (alice)));
+        vm.expectCall(chamberAddress, abi.encodeCall(IERC20(address(chamber)).balanceOf, (alice)));
         vm.expectCall(chamberAddress, abi.encodeCall(chamber.burn, (alice, quantityToRedeem)));
         vm.expectCall(chamberAddress, abi.encodeCall(chamber.getConstituentsAddresses, ()));
         vm.expectEmit(true, true, false, true, address(issuerWizard));
@@ -185,10 +193,14 @@ contract IssuerWizardUnitRedeemTest is Test {
         issuerWizard.redeem(chamber, quantityToRedeem);
 
         vm.mockCall(
-            chamberAddress, abi.encodeWithSelector(chamber.totalSupply.selector), abi.encode(0)
+            chamberAddress,
+            abi.encodeWithSelector(IERC20(address(chamber)).totalSupply.selector),
+            abi.encode(0)
         );
         vm.mockCall(
-            chamberAddress, abi.encodeWithSelector(chamber.balanceOf.selector, alice), abi.encode(0)
+            chamberAddress,
+            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, alice),
+            abi.encode(0)
         );
         uint256 currentChamberSupply = IERC20(chamberAddress).totalSupply();
         uint256 currentAliceBalance = IERC20(chamberAddress).balanceOf(alice);
@@ -209,14 +221,14 @@ contract IssuerWizardUnitRedeemTest is Test {
 
         vm.mockCall(
             chamberAddress,
-            abi.encodeWithSelector(chamber.totalSupply.selector),
+            abi.encodeWithSelector(IERC20(address(chamber)).totalSupply.selector),
             abi.encode(quantityToRedeem)
         );
-        uint256 previousChamberSupply = chamber.totalSupply();
+        uint256 previousChamberSupply = IERC20(address(chamber)).totalSupply();
 
         vm.mockCall(
             chamberAddress,
-            abi.encodeWithSelector(chamber.balanceOf.selector, alice),
+            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, alice),
             abi.encode(quantityToRedeem)
         );
         vm.mockCall(
@@ -263,10 +275,14 @@ contract IssuerWizardUnitRedeemTest is Test {
         issuerWizard.redeem(IChamber(chamberAddress), quantityToRedeem);
 
         vm.mockCall(
-            chamberAddress, abi.encodeWithSelector(chamber.totalSupply.selector), abi.encode(0)
+            chamberAddress,
+            abi.encodeWithSelector(IERC20(address(chamber)).totalSupply.selector),
+            abi.encode(0)
         );
         vm.mockCall(
-            chamberAddress, abi.encodeWithSelector(chamber.balanceOf.selector, alice), abi.encode(0)
+            chamberAddress,
+            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, alice),
+            abi.encode(0)
         );
         uint256 currentChamberSupply = IERC20(chamberAddress).totalSupply();
         uint256 currentAliceBalance = IERC20(chamberAddress).balanceOf(alice);
@@ -300,10 +316,10 @@ contract IssuerWizardUnitRedeemTest is Test {
 
         vm.mockCall(
             chamberAddress,
-            abi.encodeWithSelector(chamber.totalSupply.selector),
+            abi.encodeWithSelector(IERC20(address(chamber)).totalSupply.selector),
             abi.encode(quantityToRedeem)
         );
-        uint256 previousChamberSupply = chamber.totalSupply();
+        uint256 previousChamberSupply = IERC20(address(chamber)).totalSupply();
         uint256 previousChamberToken1Balance = IERC20(token1).balanceOf(chamberAddress);
         uint256 previousChamberToken2Balance = IERC20(token2).balanceOf(chamberAddress);
         uint256 previousAliceToken1Balance = IERC20(token1).balanceOf(alice);
@@ -316,7 +332,7 @@ contract IssuerWizardUnitRedeemTest is Test {
 
         vm.mockCall(
             chamberAddress,
-            abi.encodeWithSelector(chamber.balanceOf.selector, alice),
+            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, alice),
             abi.encode(quantityToRedeem)
         );
         vm.mockCall(
@@ -371,9 +387,11 @@ contract IssuerWizardUnitRedeemTest is Test {
         IERC20(token2).transfer(alice, requiredToken2Collateral);
 
         vm.mockCall(
-            chamberAddress, abi.encodeWithSelector(chamber.totalSupply.selector), abi.encode(0)
+            chamberAddress,
+            abi.encodeWithSelector(IERC20(address(chamber)).totalSupply.selector),
+            abi.encode(0)
         );
-        uint256 currentChamberSupply = chamber.totalSupply();
+        uint256 currentChamberSupply = IERC20(address(chamber)).totalSupply();
         uint256 currentChamberToken1Balance = IERC20(token1).balanceOf(chamberAddress);
         uint256 currentChamberToken2Balance = IERC20(token2).balanceOf(chamberAddress);
         uint256 currentAliceToken1Balance = IERC20(token1).balanceOf(alice);
