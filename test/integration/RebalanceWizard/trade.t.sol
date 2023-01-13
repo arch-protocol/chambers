@@ -6,6 +6,7 @@ import {Chamber} from "src/Chamber.sol";
 import {ArrayUtils} from "src/lib/ArrayUtils.sol";
 import {IssuerWizard} from "src/IssuerWizard.sol";
 import {RebalanceWizard} from "src/RebalanceWizard.sol";
+import {IRebalanceWizard} from "src/interfaces/IRebalanceWizard.sol";
 import {IChamber} from "src/interfaces/IChamber.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ChamberTestUtils} from "test/utils/ChamberTestUtils.sol";
@@ -31,7 +32,7 @@ contract RebalanceWizardIntegrationTradeTest is ChamberTestUtils {
     IssuerWizard private issuer;
     ExposedRebalanceWizard private rebalancer;
     ChamberFactory private factory;
-    RebalanceWizard.RebalanceParams private params;
+    IRebalanceWizard.RebalanceParams private params;
     ChamberGod private god;
     address payable private dexAggregator = payable(0xDef1C0ded9bec7F1a1670819833240f027b25EfF);
     address private owner;
@@ -107,7 +108,7 @@ contract RebalanceWizardIntegrationTradeTest is ChamberTestUtils {
         vm.startPrank(owner);
         god.addAllowedContract(target);
         chamberWithNoVault.addAllowedContract(target);
-        params = RebalanceWizard.RebalanceParams(
+        params = IRebalanceWizard.RebalanceParams(
             chamberWithNoVault, usdc, sellAmount, dai, buyAmount, payable(target), quotes
         );
         vm.expectRevert();
@@ -131,7 +132,7 @@ contract RebalanceWizardIntegrationTradeTest is ChamberTestUtils {
         vm.startPrank(owner);
         god.addAllowedContract(target);
         chamberWithNoVault.addAllowedContract(target);
-        params = RebalanceWizard.RebalanceParams(
+        params = IRebalanceWizard.RebalanceParams(
             chamberWithNoVault, usdc, sellAmount, dai, buyAmount, payable(target), quotes
         );
         vm.expectRevert("Sell quantity >= chamber balance");
@@ -148,7 +149,7 @@ contract RebalanceWizardIntegrationTradeTest is ChamberTestUtils {
         bytes memory quotes = bytes(abi.encode(buyAmount));
         address target = vm.addr(0x123123);
         vm.startPrank(owner);
-        params = RebalanceWizard.RebalanceParams(
+        params = IRebalanceWizard.RebalanceParams(
             chamberWithNoVault, usdc, sellAmount, dai, buyAmount, payable(target), quotes
         );
         vm.expectRevert("Target not allowed");
@@ -167,7 +168,7 @@ contract RebalanceWizardIntegrationTradeTest is ChamberTestUtils {
         vm.startPrank(owner);
         god.addAllowedContract(target);
         chamberWithNoVault.addAllowedContract(target);
-        params = RebalanceWizard.RebalanceParams(
+        params = IRebalanceWizard.RebalanceParams(
             chamberWithNoVault, usdc, sellAmount, dai, buyAmount, payable(target), quotes
         );
         vm.expectRevert("Cannot invoke the Chamber");
@@ -186,7 +187,7 @@ contract RebalanceWizardIntegrationTradeTest is ChamberTestUtils {
         vm.startPrank(owner);
         god.addAllowedContract(target);
         chamberWithNoVault.addAllowedContract(target);
-        params = RebalanceWizard.RebalanceParams(
+        params = IRebalanceWizard.RebalanceParams(
             chamberWithNoVault, usdc, sellAmount, dai, buyAmount, payable(target), quotes
         );
         vm.expectRevert("Sell quantity >= chamber balance");
@@ -210,7 +211,7 @@ contract RebalanceWizardIntegrationTradeTest is ChamberTestUtils {
         vm.startPrank(owner);
         god.addAllowedContract(target);
         chamberWithNoVault.addAllowedContract(target);
-        params = RebalanceWizard.RebalanceParams(
+        params = IRebalanceWizard.RebalanceParams(
             chamberWithNoVault, usdc, sellAmount, dai, buyAmount, payable(target), quotes
         );
         rebalancer.trade(params);
@@ -237,7 +238,7 @@ contract RebalanceWizardIntegrationTradeTest is ChamberTestUtils {
         uint256 price = abi.decode(result, (uint256));
         uint256 yvUSDCQty = depositAmount.preciseDiv(price, 6);
         data = abi.encodeWithSignature("deposit(uint256)", depositAmount);
-        params = RebalanceWizard.RebalanceParams(
+        params = IRebalanceWizard.RebalanceParams(
             chamberWithNoVault,
             usdc,
             depositAmount,
@@ -271,7 +272,7 @@ contract RebalanceWizardIntegrationTradeTest is ChamberTestUtils {
         uint256 expectedUSDC = sharesToSell.preciseMul(price, 6);
 
         data = abi.encodeWithSignature("withdraw(uint256)", sharesToSell);
-        params = RebalanceWizard.RebalanceParams(
+        params = IRebalanceWizard.RebalanceParams(
             chamberWithVault, yvUSDC, sharesToSell, usdc, expectedUSDC, payable(yvUSDC), data
         );
 

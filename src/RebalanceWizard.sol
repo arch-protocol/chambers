@@ -34,22 +34,9 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ArrayUtils} from "./lib/ArrayUtils.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {IRebalanceWizard} from "./interfaces/IRebalanceWizard.sol";
 
-contract RebalanceWizard is ReentrancyGuard {
-    /*//////////////////////////////////////////////////////////////
-                                 STRUCTS
-    //////////////////////////////////////////////////////////////*/
-
-    struct RebalanceParams {
-        IChamber _chamber;
-        address _sellToken;
-        uint256 _sellQuantity;
-        address _buyToken;
-        uint256 _minBuyQuantity;
-        address payable _target;
-        bytes _data;
-    }
-
+contract RebalanceWizard is ReentrancyGuard, IRebalanceWizard {
     /*//////////////////////////////////////////////////////////////
                                  LIBRARIES
     //////////////////////////////////////////////////////////////*/
@@ -57,14 +44,6 @@ contract RebalanceWizard is ReentrancyGuard {
     using SafeERC20 for IERC20;
     using ArrayUtils for address[];
     using Address for address;
-
-    /*//////////////////////////////////////////////////////////////
-                              EVENTS
-    //////////////////////////////////////////////////////////////*/
-
-    event TokenTraded(
-        address indexed oldComponent, address indexed newComponent, uint256 quantityTraded
-    );
 
     /*//////////////////////////////////////////////////////////////
                                FUNCTIONS
