@@ -109,7 +109,7 @@ contract IssuerWizard is ReentrancyGuard {
      */
     function redeem(IChamber _chamber, uint256 _quantity) external nonReentrant {
         require(_quantity > 0, "Quantity must be greater than 0");
-        uint256 currentBalance = _chamber.balanceOf(msg.sender);
+        uint256 currentBalance = IERC20(address(_chamber)).balanceOf(msg.sender);
         require(currentBalance >= _quantity, "Not enough balance to redeem");
 
         _chamber.burn(msg.sender, _quantity);
