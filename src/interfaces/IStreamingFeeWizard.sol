@@ -65,7 +65,7 @@ interface IStreamingFeeWizard {
     function getStreamingFeeRecipient(IChamber _chamber) external view returns (address);
     function getMaxStreamingFeePercentage(IChamber _chamber) external view returns (uint256);
     function getStreamingFeePercentage(IChamber _chamber) external view returns (uint256);
-    function getLastStreamingFeeTimestamp(IChamber _chamber) external view returns (uint256);
+    function getLastCollectTimestamp(IChamber _chamber) external view returns (uint256);
     function getFeeState(IChamber _chamber)
         external
         view

@@ -8,6 +8,7 @@ import {IssuerWizard} from "../../../src/IssuerWizard.sol";
 import {Chamber} from "../../../src/Chamber.sol";
 import {ChamberFactory} from "../../utils/factories.sol";
 import {StreamingFeeWizard} from "../../../src/StreamingFeeWizard.sol";
+import {IStreamingFeeWizard} from "src/interfaces/IStreamingFeeWizard.sol";
 
 contract StreamingFeeWizardIntegrationEnableChamberTest is Test {
     /*//////////////////////////////////////////////////////////////
@@ -19,7 +20,7 @@ contract StreamingFeeWizardIntegrationEnableChamberTest is Test {
     StreamingFeeWizard public streamingFeeWizard;
     ChamberFactory public chamberFactory;
     Chamber public globalChamber;
-    StreamingFeeWizard.FeeState public chamberFeeState;
+    IStreamingFeeWizard.FeeState public chamberFeeState;
     address public alice = vm.addr(0xe87809df12a1);
     address public issuerAddress;
     address public feeWizardAddress;
@@ -65,7 +66,7 @@ contract StreamingFeeWizardIntegrationEnableChamberTest is Test {
 
         chamberAddress = address(globalChamber);
 
-        chamberFeeState = StreamingFeeWizard.FeeState(address(this), 100 ether, 80 ether, 0);
+        chamberFeeState = IStreamingFeeWizard.FeeState(address(this), 100 ether, 80 ether, 0);
         streamingFeeWizard.enableChamber(IChamber(chamberAddress), chamberFeeState);
 
         vm.label(chamberGodAddress, "ChamberGod");
@@ -91,8 +92,8 @@ contract StreamingFeeWizardIntegrationEnableChamberTest is Test {
         Chamber someChamber =
             chamberFactory.getChamberWithCustomTokens(globalConstituents, globalQuantities);
 
-        StreamingFeeWizard.FeeState memory customFeeState =
-            StreamingFeeWizard.FeeState(address(this), 100 ether, 80 ether, 0);
+        IStreamingFeeWizard.FeeState memory customFeeState =
+            IStreamingFeeWizard.FeeState(address(this), 100 ether, 80 ether, 0);
 
         vm.expectRevert(bytes("msg.sender is not chamber's manager"));
         vm.prank(caller);
@@ -106,8 +107,8 @@ contract StreamingFeeWizardIntegrationEnableChamberTest is Test {
         Chamber someChamber =
             chamberFactory.getChamberWithCustomTokens(globalConstituents, globalQuantities);
 
-        StreamingFeeWizard.FeeState memory customFeeState =
-            StreamingFeeWizard.FeeState(address(0), 100 ether, 80 ether, 0);
+        IStreamingFeeWizard.FeeState memory customFeeState =
+            IStreamingFeeWizard.FeeState(address(0), 100 ether, 80 ether, 0);
 
         vm.expectRevert(bytes("Recipient cannot be null address"));
         streamingFeeWizard.enableChamber(IChamber(address(someChamber)), customFeeState);
@@ -120,8 +121,8 @@ contract StreamingFeeWizardIntegrationEnableChamberTest is Test {
         Chamber someChamber =
             chamberFactory.getChamberWithCustomTokens(globalConstituents, globalQuantities);
 
-        StreamingFeeWizard.FeeState memory customFeeState =
-            StreamingFeeWizard.FeeState(address(this), 100 ether + 1, 80 ether, 0);
+        IStreamingFeeWizard.FeeState memory customFeeState =
+            IStreamingFeeWizard.FeeState(address(this), 100 ether + 1, 80 ether, 0);
 
         vm.expectRevert(bytes("Max fee must be <= 100%"));
         streamingFeeWizard.enableChamber(IChamber(address(someChamber)), customFeeState);
@@ -134,8 +135,8 @@ contract StreamingFeeWizardIntegrationEnableChamberTest is Test {
         Chamber someChamber =
             chamberFactory.getChamberWithCustomTokens(globalConstituents, globalQuantities);
 
-        StreamingFeeWizard.FeeState memory customFeeState =
-            StreamingFeeWizard.FeeState(address(this), 40 ether, 45 ether, 0);
+        IStreamingFeeWizard.FeeState memory customFeeState =
+            IStreamingFeeWizard.FeeState(address(this), 40 ether, 45 ether, 0);
 
         vm.expectRevert(bytes("Fee must be <= Max fee"));
         streamingFeeWizard.enableChamber(IChamber(address(someChamber)), customFeeState);
@@ -145,8 +146,8 @@ contract StreamingFeeWizardIntegrationEnableChamberTest is Test {
      * [REVERT] Shoudl revert if trying to enable a Chamber that already exists
      */
     function testCannotEnableChamberIfItAlreadyExists() public {
-        StreamingFeeWizard.FeeState memory customFeeState =
-            StreamingFeeWizard.FeeState(address(this), 40 ether, 35 ether, 0);
+        IStreamingFeeWizard.FeeState memory customFeeState =
+            IStreamingFeeWizard.FeeState(address(this), 40 ether, 35 ether, 0);
 
         vm.expectRevert(bytes("Chamber already exists"));
         streamingFeeWizard.enableChamber(IChamber(chamberAddress), customFeeState);
@@ -163,8 +164,8 @@ contract StreamingFeeWizardIntegrationEnableChamberTest is Test {
     function testEnableChamberShouldCreateAChamberInTheWizard() public {
         Chamber someChamber =
             chamberFactory.getChamberWithCustomTokens(globalConstituents, globalQuantities);
-        StreamingFeeWizard.FeeState memory customFeeState =
-            StreamingFeeWizard.FeeState(address(this), 30 ether, 8.1 ether, 0);
+        IStreamingFeeWizard.FeeState memory customFeeState =
+            IStreamingFeeWizard.FeeState(address(this), 30 ether, 8.1 ether, 0);
 
         streamingFeeWizard.enableChamber(IChamber(address(someChamber)), customFeeState);
 

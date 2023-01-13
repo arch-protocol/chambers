@@ -31,28 +31,9 @@ pragma solidity ^0.8.17.0;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IChamber} from "./interfaces/IChamber.sol";
 import {ReentrancyGuard} from "solmate/utils/ReentrancyGuard.sol";
+import {IStreamingFeeWizard} from "./interfaces/IStreamingFeeWizard.sol";
 
-contract StreamingFeeWizard is ReentrancyGuard {
-    /*//////////////////////////////////////////////////////////////
-                              STRUCT
-    //////////////////////////////////////////////////////////////*/
-    struct FeeState {
-        address feeRecipient;
-        uint256 maxStreamingFeePercentage;
-        uint256 streamingFeePercentage;
-        uint256 lastCollectTimestamp;
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                              EVENTS
-    //////////////////////////////////////////////////////////////*/
-    event FeeCollected(
-        address indexed _chamber, uint256 _streamingFeePercentage, uint256 _inflationQuantity
-    );
-    event StreamingFeeUpdated(address indexed _chamber, uint256 _newStreamingFee);
-    event MaxStreamingFeeUpdated(address indexed _chamber, uint256 _newMaxStreamingFee);
-    event FeeRecipientUpdated(address indexed _chamber, address _newFeeRecipient);
-
+contract StreamingFeeWizard is IStreamingFeeWizard, ReentrancyGuard {
     /*//////////////////////////////////////////////////////////////
                               STORAGE
     //////////////////////////////////////////////////////////////*/

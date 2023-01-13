@@ -12,6 +12,7 @@ import {ChamberFactory} from "../../utils/factories.sol";
 import {StreamingFeeWizard} from "../../../src/StreamingFeeWizard.sol";
 import {ExposedStreamingFeeWizard} from "../../utils/exposedContracts/ExposedStreamingFeeWizard.sol";
 import {PreciseUnitMath} from "../../../src/lib/PreciseUnitMath.sol";
+import {IStreamingFeeWizard} from "src/interfaces/IStreamingFeeWizard.sol";
 
 contract StreamingFeeWizardIntegrationUpdateStreamingFeeTest is Test {
     using PreciseUnitMath for uint256;
@@ -35,7 +36,7 @@ contract StreamingFeeWizardIntegrationUpdateStreamingFeeTest is Test {
     ExposedStreamingFeeWizard public streamingFeeWizard;
     ChamberFactory public chamberFactory;
     Chamber public globalChamber;
-    StreamingFeeWizard.FeeState public chamberFeeState;
+    IStreamingFeeWizard.FeeState public chamberFeeState;
     address public aliceTheSorcerer = vm.addr(0xe87809df12a1);
     address public issuerAddress;
     address public feeWizardAddress;
@@ -82,7 +83,7 @@ contract StreamingFeeWizardIntegrationUpdateStreamingFeeTest is Test {
 
         chamberAddress = address(globalChamber);
 
-        chamberFeeState = StreamingFeeWizard.FeeState(address(this), 100 ether, 80 ether, 0);
+        chamberFeeState = IStreamingFeeWizard.FeeState(address(this), 100 ether, 80 ether, 0);
         streamingFeeWizard.enableChamber(IChamber(chamberAddress), chamberFeeState);
 
         vm.label(chamberGodAddress, "ChamberGod");
@@ -328,8 +329,8 @@ contract StreamingFeeWizardIntegrationUpdateStreamingFeeTest is Test {
         Chamber someChamber =
             chamberFactory.getChamberWithCustomTokens(globalConstituents, globalQuantities);
 
-        StreamingFeeWizard.FeeState memory feeState =
-            StreamingFeeWizard.FeeState(address(this), 100 ether, 0 ether, 0);
+        IStreamingFeeWizard.FeeState memory feeState =
+            IStreamingFeeWizard.FeeState(address(this), 100 ether, 0 ether, 0);
         streamingFeeWizard.enableChamber(IChamber(address(someChamber)), feeState);
 
         // Add some supply
@@ -406,8 +407,8 @@ contract StreamingFeeWizardIntegrationUpdateStreamingFeeTest is Test {
         Chamber someChamber =
             chamberFactory.getChamberWithCustomTokens(globalConstituents, globalQuantities);
 
-        StreamingFeeWizard.FeeState memory feeState =
-            StreamingFeeWizard.FeeState(address(this), 100 ether, 0 ether, 0);
+        IStreamingFeeWizard.FeeState memory feeState =
+            IStreamingFeeWizard.FeeState(address(this), 100 ether, 0 ether, 0);
 
         streamingFeeWizard.enableChamber(IChamber(address(someChamber)), feeState);
 
