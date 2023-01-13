@@ -38,7 +38,7 @@ interface IIssuerWizard {
     event ChamberTokenIssued(address indexed chamber, address indexed recipient, uint256 quantity);
 
     event ChamberTokenRedeemed(
-        address indexed chamber, address indexed issuer, address indexed recipient, uint256 quantity
+        address indexed chamber, address indexed recipient, uint256 quantity
     );
 
     /*//////////////////////////////////////////////////////////////
