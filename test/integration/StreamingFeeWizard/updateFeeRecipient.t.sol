@@ -8,6 +8,7 @@ import {IssuerWizard} from "../../../src/IssuerWizard.sol";
 import {Chamber} from "../../../src/Chamber.sol";
 import {ChamberFactory} from "../../utils/factories.sol";
 import {StreamingFeeWizard} from "../../../src/StreamingFeeWizard.sol";
+import {IStreamingFeeWizard} from "src/interfaces/IStreamingFeeWizard.sol";
 
 contract StreamingFeeWizardIntegrationUpdateFeeRecipientTest is Test {
     /*//////////////////////////////////////////////////////////////
@@ -25,7 +26,7 @@ contract StreamingFeeWizardIntegrationUpdateFeeRecipientTest is Test {
     StreamingFeeWizard public streamingFeeWizard;
     ChamberFactory public chamberFactory;
     Chamber public globalChamber;
-    StreamingFeeWizard.FeeState public chamberFeeState;
+    IStreamingFeeWizard.FeeState public chamberFeeState;
     address public alice = vm.addr(0xe87809df12a1);
     address public issuerAddress;
     address public feeWizardAddress;
@@ -71,7 +72,7 @@ contract StreamingFeeWizardIntegrationUpdateFeeRecipientTest is Test {
 
         chamberAddress = address(globalChamber);
 
-        chamberFeeState = StreamingFeeWizard.FeeState(address(this), 100 ether, 2 ether, 0);
+        chamberFeeState = IStreamingFeeWizard.FeeState(address(this), 100 ether, 2 ether, 0);
         streamingFeeWizard.enableChamber(IChamber(chamberAddress), chamberFeeState);
 
         vm.label(chamberGodAddress, "ChamberGod");

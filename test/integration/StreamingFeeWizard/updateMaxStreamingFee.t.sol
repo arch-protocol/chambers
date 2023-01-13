@@ -7,6 +7,7 @@ import {IChamber} from "../../../src/interfaces/IChamber.sol";
 import {Chamber} from "../../../src/Chamber.sol";
 import {ChamberFactory} from "../../utils/factories.sol";
 import {StreamingFeeWizard} from "../../../src/StreamingFeeWizard.sol";
+import {IStreamingFeeWizard} from "src/interfaces/IStreamingFeeWizard.sol";
 
 contract StreamingFeeWizardIntegrationUpdateMaxStreamingFeeTest is Test {
     /*//////////////////////////////////////////////////////////////
@@ -23,7 +24,7 @@ contract StreamingFeeWizardIntegrationUpdateMaxStreamingFeeTest is Test {
     StreamingFeeWizard public streamingFeeWizard;
     ChamberFactory public chamberFactory;
     Chamber public globalChamber;
-    StreamingFeeWizard.FeeState public chamberFeeState;
+    IStreamingFeeWizard.FeeState public chamberFeeState;
     address public feeWizardAddress;
     address public chamberAddress;
     address public token1 = 0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39; // HEX on ETH
@@ -62,7 +63,7 @@ contract StreamingFeeWizardIntegrationUpdateMaxStreamingFeeTest is Test {
 
         chamberAddress = address(globalChamber);
 
-        chamberFeeState = StreamingFeeWizard.FeeState(address(this), 100 ether, 80 ether, 0);
+        chamberFeeState = IStreamingFeeWizard.FeeState(address(this), 100 ether, 80 ether, 0);
         streamingFeeWizard.enableChamber(IChamber(chamberAddress), chamberFeeState);
 
         vm.label(feeWizardAddress, "FeeWizard");

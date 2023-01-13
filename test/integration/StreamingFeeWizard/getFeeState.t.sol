@@ -8,6 +8,7 @@ import {IssuerWizard} from "../../../src/IssuerWizard.sol";
 import {Chamber} from "../../../src/Chamber.sol";
 import {ChamberFactory} from "../../utils/factories.sol";
 import {StreamingFeeWizard} from "../../../src/StreamingFeeWizard.sol";
+import {IStreamingFeeWizard} from "src/interfaces/IStreamingFeeWizard.sol";
 
 contract StreamingFeeWizardIntegrationGetFeeStateTest is Test {
     /*//////////////////////////////////////////////////////////////
@@ -105,8 +106,8 @@ contract StreamingFeeWizardIntegrationGetFeeStateTest is Test {
         vm.assume(feePercetange <= maxFeePercentage);
 
         uint256 currentBlock = block.timestamp;
-        StreamingFeeWizard.FeeState memory chamberFeeState =
-            StreamingFeeWizard.FeeState(address(this), maxFeePercentage, feePercetange, 0);
+        IStreamingFeeWizard.FeeState memory chamberFeeState =
+            IStreamingFeeWizard.FeeState(address(this), maxFeePercentage, feePercetange, 0);
         streamingFeeWizard.enableChamber(IChamber(chamberAddress), chamberFeeState);
 
         (

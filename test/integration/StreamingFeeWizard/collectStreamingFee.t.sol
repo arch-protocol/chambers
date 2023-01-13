@@ -12,6 +12,7 @@ import {ChamberFactory} from "../../utils/factories.sol";
 import {StreamingFeeWizard} from "../../../src/StreamingFeeWizard.sol";
 import {ExposedStreamingFeeWizard} from "../../utils/exposedContracts/ExposedStreamingFeeWizard.sol";
 import {PreciseUnitMath} from "../../../src/lib/PreciseUnitMath.sol";
+import {IStreamingFeeWizard} from "src/interfaces/IStreamingFeeWizard.sol";
 
 contract StreamingFeeWizardIntegrationCollectStreamingFeeTest is Test {
     using PreciseUnitMath for uint256;
@@ -81,7 +82,7 @@ contract StreamingFeeWizardIntegrationCollectStreamingFeeTest is Test {
 
         chamberAddress = address(globalChamber);
 
-        chamberFeeState = StreamingFeeWizard.FeeState(address(this), 100 ether, 80 ether, 0);
+        chamberFeeState = IStreamingFeeWizard.FeeState(address(this), 100 ether, 80 ether, 0);
         streamingFeeWizard.enableChamber(IChamber(chamberAddress), chamberFeeState);
 
         vm.label(chamberGodAddress, "ChamberGod");
@@ -229,8 +230,8 @@ contract StreamingFeeWizardIntegrationCollectStreamingFeeTest is Test {
         Chamber someChamber =
             chamberFactory.getChamberWithCustomTokens(globalConstituents, globalQuantities);
 
-        StreamingFeeWizard.FeeState memory feeState =
-            StreamingFeeWizard.FeeState(address(this), 100 ether, 0 ether, 0); // 0% fee
+        IStreamingFeeWizard.FeeState memory feeState =
+            IStreamingFeeWizard.FeeState(address(this), 100 ether, 0 ether, 0); // 0% fee
 
         streamingFeeWizard.enableChamber(IChamber(address(someChamber)), feeState);
 
@@ -440,8 +441,8 @@ contract StreamingFeeWizardIntegrationCollectStreamingFeeTest is Test {
         Chamber someChamber =
             chamberFactory.getChamberWithCustomTokens(globalConstituents, globalQuantities);
 
-        StreamingFeeWizard.FeeState memory feeState =
-            StreamingFeeWizard.FeeState(address(this), 100 ether, 100 ether, 0); // 100% fee
+        IStreamingFeeWizard.FeeState memory feeState =
+            IStreamingFeeWizard.FeeState(address(this), 100 ether, 100 ether, 0); // 100% fee
 
         streamingFeeWizard.enableChamber(IChamber(address(someChamber)), feeState);
 
