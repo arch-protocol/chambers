@@ -34,20 +34,11 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {PreciseUnitMath} from "./lib/PreciseUnitMath.sol";
+import {IIssuerWizard} from "./interfaces/IIssuerWizard.sol";
 
-contract IssuerWizard is ReentrancyGuard {
+contract IssuerWizard is IIssuerWizard, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using PreciseUnitMath for uint256;
-
-    /*//////////////////////////////////////////////////////////////
-                              EVENTS
-    //////////////////////////////////////////////////////////////*/
-
-    event ChamberTokenIssued(address indexed chamber, address indexed recipient, uint256 quantity);
-
-    event ChamberTokenRedeemed(
-        address indexed chamber, address indexed recipient, uint256 quantity
-    );
 
     /*//////////////////////////////////////////////////////////////
                                FUNCTIONS
