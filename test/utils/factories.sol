@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache License 2.0
 pragma solidity ^0.8.17.0;
 
-import {Chamber} from "../../src/Chamber.sol";
+import {Chamber} from "src/Chamber.sol";
 
 contract ChamberFactory {
     address public owner;

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache License 2.0
 pragma solidity ^0.8.17.0;
 
-import {IChamber} from "../../../src/interfaces/IChamber.sol";
-import {StreamingFeeWizard} from "../../../src/StreamingFeeWizard.sol";
+import {IChamber} from "src/interfaces/IChamber.sol";
+import {StreamingFeeWizard} from "src/StreamingFeeWizard.sol";
 
 contract ExposedStreamingFeeWizard is StreamingFeeWizard {
     /*//////////////////////////////////////////////////////////////

@@ -3,11 +3,11 @@
 pragma solidity ^0.8.17.0;
 
 import "forge-std/Test.sol";
-import {IChamber} from "../../../src/interfaces/IChamber.sol";
-import {IssuerWizard} from "../../../src/IssuerWizard.sol";
-import {Chamber} from "../../../src/Chamber.sol";
-import {ChamberFactory} from "../../utils/factories.sol";
-import {StreamingFeeWizard} from "../../../src/StreamingFeeWizard.sol";
+import {IChamber} from "src/interfaces/IChamber.sol";
+import {IssuerWizard} from "src/IssuerWizard.sol";
+import {Chamber} from "src/Chamber.sol";
+import {ChamberFactory} from "test/utils/factories.sol";
+import {StreamingFeeWizard} from "src/StreamingFeeWizard.sol";
 import {IStreamingFeeWizard} from "src/interfaces/IStreamingFeeWizard.sol";
 
 contract StreamingFeeWizardIntegrationGetMaxStreamingFeeTest is Test {

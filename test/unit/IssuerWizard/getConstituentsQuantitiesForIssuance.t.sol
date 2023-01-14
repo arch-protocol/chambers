@@ -4,9 +4,9 @@ pragma solidity ^0.8.17.0;
 
 import "forge-std/Test.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {IChamber} from "../../../src/interfaces/IChamber.sol";
-import {IssuerWizard} from "../../../src/IssuerWizard.sol";
-import {PreciseUnitMath} from "../../../src/lib/PreciseUnitMath.sol";
+import {IChamber} from "src/interfaces/IChamber.sol";
+import {IssuerWizard} from "src/IssuerWizard.sol";
+import {PreciseUnitMath} from "src/lib/PreciseUnitMath.sol";
 
 contract IssuerWizardUnitGetConstituentsQuantitiesForIssuanceTest is Test {
     using PreciseUnitMath for uint256;

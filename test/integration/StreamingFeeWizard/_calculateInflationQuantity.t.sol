@@ -3,7 +3,7 @@
 pragma solidity ^0.8.17.0;
 
 import "forge-std/Test.sol";
-import {ExposedStreamingFeeWizard} from "../../utils/exposedContracts/ExposedStreamingFeeWizard.sol";
+import {ExposedStreamingFeeWizard} from "test/utils/exposedContracts/ExposedStreamingFeeWizard.sol";
 
 contract StreamingFeeWizardIntegrationInternalCalculateInflationQuantityTest is Test {
     /*//////////////////////////////////////////////////////////////
