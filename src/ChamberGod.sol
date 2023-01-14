@@ -31,27 +31,14 @@ pragma solidity ^0.8.17.0;
 import {Owned} from "solmate/auth/Owned.sol";
 import {ArrayUtils} from "./lib/ArrayUtils.sol";
 import {Chamber} from "./Chamber.sol";
+import {IChamberGod} from "./interfaces/IChamberGod.sol";
 
-contract ChamberGod is Owned {
+contract ChamberGod is IChamberGod, Owned {
     /*//////////////////////////////////////////////////////////////
                               LIBRARIES
     //////////////////////////////////////////////////////////////*/
 
     using ArrayUtils for address[];
-
-    /*//////////////////////////////////////////////////////////////
-                                 EVENTS
-    //////////////////////////////////////////////////////////////*/
-
-    event ChamberCreated(address indexed _chamber, address _owner, string _name, string _symbol);
-
-    event WizardAdded(address indexed _wizard);
-
-    event WizardRemoved(address indexed _wizard);
-
-    event AllowedContractAdded(address indexed _allowedContract);
-
-    event AllowedContractRemoved(address indexed _allowedContract);
 
     /*//////////////////////////////////////////////////////////////
                               GOD STORAGE

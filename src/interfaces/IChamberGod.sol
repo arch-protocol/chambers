@@ -39,19 +39,26 @@ interface IChamberGod {
 
     event WizardRemoved(address indexed _wizard);
 
+    event AllowedContractAdded(address indexed _allowedContract);
+
+    event AllowedContractRemoved(address indexed _allowedContract);
+
     /*//////////////////////////////////////////////////////////////
                             CHAMBER GOD LOGIC
     //////////////////////////////////////////////////////////////*/
 
     function createChamber(
-        address _owner,
         string memory _name,
         string memory _symbol,
         address[] memory _constituents,
-        int256[] memory _quantities,
+        uint256[] memory _quantities,
         address[] memory _wizards,
         address[] memory _managers
     ) external returns (address);
+
+    function getWizards() external view returns (address[] memory);
+
+    function getChambers() external view returns (address[] memory);
 
     function isWizard(address _wizard) external view returns (bool);
 
@@ -61,13 +68,11 @@ interface IChamberGod {
 
     function removeWizard(address _wizard) external;
 
-    function removeChamber(address _chamber) external;
+    function getAllowedContracts() external view returns (address[] memory);
 
-    function addAllowedContract(address target) external;
+    function addAllowedContract(address _target) external;
 
-    function removeAllowedContract(address target) external;
+    function removeAllowedContract(address _target) external;
 
-    function isAllowedContract(address _target) external returns (bool);
-
-    function getAllowedContracts() external returns (address[] memory);
+    function isAllowedContract(address _target) external view returns (bool);
 }
