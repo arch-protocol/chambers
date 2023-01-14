@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache License 2.0
 pragma solidity ^0.8.17.0;
 
-import {ChamberTestUtils} from "../../utils/ChamberTestUtils.sol";
+import {ChamberTestUtils} from "test/utils/ChamberTestUtils.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {ExposedChamber} from "../../utils/exposedContracts/ExposedChamber.sol";
+import {ExposedChamber} from "test/utils/exposedContracts/ExposedChamber.sol";
 
 contract ChamberIntegrationInternalInvokeContractTest is ChamberTestUtils {
     using SafeERC20 for IERC20;

@@ -5,13 +5,13 @@ pragma solidity ^0.8.17.0;
 import "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {IChamber} from "../../../src/interfaces/IChamber.sol";
-import {IssuerWizard} from "../../../src/IssuerWizard.sol";
-import {Chamber} from "../../../src/Chamber.sol";
-import {ChamberFactory} from "../../utils/factories.sol";
-import {StreamingFeeWizard} from "../../../src/StreamingFeeWizard.sol";
-import {ExposedStreamingFeeWizard} from "../../utils/exposedContracts/ExposedStreamingFeeWizard.sol";
-import {PreciseUnitMath} from "../../../src/lib/PreciseUnitMath.sol";
+import {IChamber} from "src/interfaces/IChamber.sol";
+import {IssuerWizard} from "src/IssuerWizard.sol";
+import {Chamber} from "src/Chamber.sol";
+import {ChamberFactory} from "test/utils/factories.sol";
+import {StreamingFeeWizard} from "src/StreamingFeeWizard.sol";
+import {ExposedStreamingFeeWizard} from "test/utils/exposedContracts/ExposedStreamingFeeWizard.sol";
+import {PreciseUnitMath} from "src/lib/PreciseUnitMath.sol";
 import {IStreamingFeeWizard} from "src/interfaces/IStreamingFeeWizard.sol";
 
 contract StreamingFeeWizardIntegrationInternalCollectStreamingFeeTest is Test {
