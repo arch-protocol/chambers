@@ -53,7 +53,7 @@ contract ChamberIntegrationUpdateQuantitiesTest is Test {
         globalQuantities[0] = 6 ether;
         globalQuantities[1] = 2 ether;
 
-        issuerWizard = new IssuerWizard();
+        issuerWizard = new IssuerWizard(chamberGodAddress);
         issuerAddress = address(issuerWizard);
 
         evilSaruman = new EvilSaruman();

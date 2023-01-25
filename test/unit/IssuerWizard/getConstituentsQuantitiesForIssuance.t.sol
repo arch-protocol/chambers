@@ -33,7 +33,7 @@ contract IssuerWizardUnitGetConstituentsQuantitiesForIssuanceTest is Test {
     //////////////////////////////////////////////////////////////*/
 
     function setUp() public {
-        issuerWizard = new IssuerWizard();
+        issuerWizard = new IssuerWizard(chamberGodAddress);
         chamber = IChamber(chamberAddress);
         issuerAddress = address(issuerWizard);
         vm.label(chamberGodAddress, "ChamberGod");

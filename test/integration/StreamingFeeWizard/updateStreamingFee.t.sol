@@ -57,7 +57,7 @@ contract StreamingFeeWizardIntegrationUpdateStreamingFeeTest is Test {
         globalQuantities[0] = 54;
         globalQuantities[1] = 77;
 
-        issuerWizard = new IssuerWizard();
+        issuerWizard = new IssuerWizard(chamberGodAddress);
         issuerAddress = address(issuerWizard);
 
         streamingFeeWizard = new ExposedStreamingFeeWizard();

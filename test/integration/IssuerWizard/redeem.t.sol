@@ -45,7 +45,7 @@ contract IssuerWizardIntegrationRedeemTest is Test {
         globalQuantities[0] = 1;
         globalQuantities[1] = 2;
 
-        issuerWizard = new IssuerWizard();
+        issuerWizard = new IssuerWizard(chamberGodAddress);
         issuerAddress = address(issuerWizard);
 
         address[] memory wizards = new address[](1);
