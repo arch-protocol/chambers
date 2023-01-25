@@ -8,7 +8,7 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IChamber} from "src/interfaces/IChamber.sol";
 import {IssuerWizard} from "src/IssuerWizard.sol";
 import {Chamber} from "src/Chamber.sol";
-import {ChamberFactory} from "test/utils/factories.sol";
+import {ChamberGod} from "src/ChamberGod.sol";
 import {PreciseUnitMath} from "src/lib/PreciseUnitMath.sol";
 
 contract IssuerWizardIntegrationIssueTest is Test {
@@ -19,16 +19,18 @@ contract IssuerWizardIntegrationIssueTest is Test {
     //////////////////////////////////////////////////////////////*/
 
     IssuerWizard public issuerWizard;
-    ChamberFactory public chamberFactory;
+    ChamberGod public chamberGod;
     Chamber public globalChamber;
     address public alice = vm.addr(0xe87809df12a1);
     address public issuerAddress;
     address public chamberAddress;
-    address public chamberGodAddress = vm.addr(0x791782394);
+    address public chamberGodAddress = address(chamberGod);
     address public token1 = 0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39; // HEX on ETH
     address public token2 = 0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e; // YFI on ETH
     address[] public globalConstituents = new address[](2);
     uint256[] public globalQuantities = new uint256[](2);
+    address[] public wizards = new address[](1);
+    address[] public managers = new address[](1);
 
     event ChamberTokenIssued(address indexed chamber, address indexed issuer, uint256 quantity);
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -42,30 +44,24 @@ contract IssuerWizardIntegrationIssueTest is Test {
         globalConstituents[1] = token2;
         globalQuantities[0] = 1;
         globalQuantities[1] = 2;
-
-        issuerWizard = new IssuerWizard(chamberGodAddress);
+        chamberGod = new ChamberGod();
+        issuerWizard = new IssuerWizard(address(chamberGod));
         issuerAddress = address(issuerWizard);
 
-        address[] memory wizards = new address[](1);
+        chamberGod.addWizard(issuerAddress);
+
         wizards[0] = issuerAddress;
-        address[] memory managers = new address[](1);
         managers[0] = vm.addr(0x92837498ba);
 
-        chamberFactory = new ChamberFactory(
-          address(this),
-          "name",
-          "symbol",
-          wizards,
-          managers
+        globalChamber = Chamber(
+            chamberGod.createChamber(
+                "name", "symbol", globalConstituents, globalQuantities, wizards, managers
+            )
         );
-
-        globalChamber =
-            chamberFactory.getChamberWithCustomTokens(globalConstituents, globalQuantities);
 
         vm.label(chamberGodAddress, "ChamberGod");
         vm.label(issuerAddress, "IssuerWizard");
         vm.label(address(globalChamber), "Chamber");
-        vm.label(address(chamberFactory), "ChamberFactory");
         vm.label(alice, "Alice");
         vm.label(token1, "HEX");
         vm.label(token2, "YFI");
@@ -74,6 +70,20 @@ contract IssuerWizardIntegrationIssueTest is Test {
     /*//////////////////////////////////////////////////////////////
                               REVERT
     //////////////////////////////////////////////////////////////*/
+
+    /**
+     * [REVERT] Calling issue() should revert if chamber has not been created by ChamberGod
+     */
+    function testCannotIssueChamberNotCreatedByGod() public {
+        address fakeChamber = vm.addr(0x123456);
+        uint256 previousChamberSupply = IERC20(address(globalChamber)).totalSupply();
+        vm.expectRevert(bytes("Target chamber not valid"));
+
+        issuerWizard.issue(IChamber(address(fakeChamber)), 0);
+
+        uint256 currentChamberSupply = IERC20(address(globalChamber)).totalSupply();
+        assertEq(currentChamberSupply, previousChamberSupply);
+    }
 
     /**
      * [REVERT] Calling issue() should revert if quantity to mint is zero
@@ -108,8 +118,11 @@ contract IssuerWizardIntegrationIssueTest is Test {
         uint256[] memory testQuantities = new uint256[](1);
         testQuantities[0] = token1Quantity;
 
-        Chamber chamber =
-            chamberFactory.getChamberWithCustomTokens(testConstituents, testQuantities);
+        Chamber chamber = Chamber(
+            chamberGod.createChamber(
+                "name", "symbol", testConstituents, testQuantities, wizards, managers
+            )
+        );
 
         uint256 previousChamberBalance = IERC20(token1).balanceOf(address(chamber));
         uint256 previousChamberSupply = IERC20(address(chamber)).totalSupply();
@@ -156,8 +169,11 @@ contract IssuerWizardIntegrationIssueTest is Test {
         uint256[] memory testQuantities = new uint256[](1);
         testQuantities[0] = token1Quantity;
 
-        Chamber chamber =
-            chamberFactory.getChamberWithCustomTokens(testConstituents, testQuantities);
+        Chamber chamber = Chamber(
+            chamberGod.createChamber(
+                "name", "symbol", testConstituents, testQuantities, wizards, managers
+            )
+        );
 
         uint256 previousChamberBalance = IERC20(token1).balanceOf(address(chamber));
         uint256 previousChamberSupply = IERC20(address(chamber)).totalSupply();
@@ -203,8 +219,11 @@ contract IssuerWizardIntegrationIssueTest is Test {
         uint256[] memory testQuantities = new uint256[](1);
         testQuantities[0] = token1Quantity;
 
-        Chamber chamber =
-            chamberFactory.getChamberWithCustomTokens(testConstituents, testQuantities);
+        Chamber chamber = Chamber(
+            chamberGod.createChamber(
+                "name", "symbol", testConstituents, testQuantities, wizards, managers
+            )
+        );
 
         uint256 previousChamberBalance = IERC20(token1).balanceOf(address(chamber));
         uint256 previousChamberSupply = IERC20(address(chamber)).totalSupply();
@@ -256,8 +275,11 @@ contract IssuerWizardIntegrationIssueTest is Test {
         testQuantities[0] = token1Quantity;
         testQuantities[1] = token2Quantity;
 
-        Chamber chamber =
-            chamberFactory.getChamberWithCustomTokens(globalConstituents, testQuantities);
+        Chamber chamber = Chamber(
+            chamberGod.createChamber(
+                "name", "symbol", globalConstituents, testQuantities, wizards, managers
+            )
+        );
 
         uint256 previousChamberBalanceToken1 = IERC20(token1).balanceOf(address(chamber));
         uint256 previousChamberBalanceToken2 = IERC20(token2).balanceOf(address(chamber));
@@ -293,72 +315,6 @@ contract IssuerWizardIntegrationIssueTest is Test {
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * [SUCCESS] Should mint an *infinite* quantity amount of tokens if there are no constituents.
-     * This scenario SHOULD NEVER happen, as other contracts won't let this occur
-     */
-    function testIssueWithZeroComponents(uint256 quantityToMint) public {
-        vm.assume(quantityToMint > 0);
-
-        address[] memory testConstituents = new address[](0);
-        uint256[] memory testQuantities = new uint256[](0);
-
-        Chamber chamber =
-            chamberFactory.getChamberWithCustomTokens(testConstituents, testQuantities);
-
-        vm.expectCall(
-            address(chamber), abi.encodeCall(chamber.mint, (address(this), quantityToMint))
-        );
-        vm.expectEmit(true, true, true, true, address(issuerWizard));
-        emit ChamberTokenIssued(address(chamber), address(this), quantityToMint);
-        uint256 previousChamberSupply = IERC20(address(chamber)).totalSupply();
-
-        issuerWizard.issue(IChamber(address(chamber)), quantityToMint);
-
-        uint256 currentChamberSupply = IERC20(address(chamber)).totalSupply();
-        uint256 thisBalance = IERC20(address(chamber)).balanceOf(address(this));
-
-        assertEq(currentChamberSupply, previousChamberSupply + quantityToMint);
-        assertEq(thisBalance, quantityToMint);
-    }
-
-    /**
-     * [SUCCESS] Should mint an *infinite* quantity amount of tokens if all requiredConstituentsQuantities
-     * are zero. This scenario SHOULD NEVER happen, as other contracts won't let this occur
-     */
-    function testIssueWithAllConstituentsQuantitiesInZero(uint256 quantityToMint) public {
-        vm.assume(quantityToMint > 0);
-
-        uint256[] memory testQuantities = new uint256[](2);
-        testQuantities[0] = 0;
-        testQuantities[1] = 0;
-
-        Chamber chamber =
-            chamberFactory.getChamberWithCustomTokens(globalConstituents, testQuantities);
-
-        vm.expectCall(
-            address(token1),
-            abi.encodeCall(IERC20(token1).transferFrom, (address(this), address(chamber), 0))
-        );
-        vm.expectCall(
-            address(token2),
-            abi.encodeCall(IERC20(token1).transferFrom, (address(this), address(chamber), 0))
-        );
-        vm.expectCall(
-            address(chamber), abi.encodeCall(chamber.mint, (address(this), quantityToMint))
-        );
-        vm.expectEmit(true, true, true, true, issuerAddress);
-        emit ChamberTokenIssued(address(chamber), address(this), quantityToMint);
-        uint256 previousChamberSupply = IERC20(address(chamber)).totalSupply();
-
-        issuerWizard.issue(IChamber(address(chamber)), quantityToMint);
-
-        uint256 currentChamberSupply = IERC20(address(chamber)).totalSupply();
-        uint256 thisBalance = IERC20(address(chamber)).balanceOf(address(this));
-        assertEq(currentChamberSupply, previousChamberSupply + quantityToMint);
-        assertEq(thisBalance, quantityToMint);
-    }
-
-    /**
      * [SUCCESS] Should call issue() and mint the correct quantity of tokens to Alice, when she has the collateral,
      * and previously approved the issuerWizard to transfer her tokens. Only one constituent is tested
      */
@@ -373,8 +329,11 @@ contract IssuerWizardIntegrationIssueTest is Test {
         uint256[] memory testQuantities = new uint256[](1);
         testQuantities[0] = token1Quantity;
 
-        Chamber chamber =
-            chamberFactory.getChamberWithCustomTokens(testConstituents, testQuantities);
+        Chamber chamber = Chamber(
+            chamberGod.createChamber(
+                "name", "symbol", testConstituents, testQuantities, wizards, managers
+            )
+        );
 
         uint256 requiredToken1Collateral = quantityToMint.preciseMulCeil(token1Quantity, 18);
         deal(token1, alice, requiredToken1Collateral);
@@ -430,8 +389,11 @@ contract IssuerWizardIntegrationIssueTest is Test {
         testQuantities[0] = token1Quantity;
         testQuantities[1] = token2Quantity;
 
-        Chamber chamber =
-            chamberFactory.getChamberWithCustomTokens(globalConstituents, testQuantities);
+        Chamber chamber = Chamber(
+            chamberGod.createChamber(
+                "name", "symbol", globalConstituents, testQuantities, wizards, managers
+            )
+        );
 
         uint256 requiredToken1Collateral = quantityToMint.preciseMulCeil(token1Quantity, 18);
         uint256 requiredToken2Collateral = quantityToMint.preciseMulCeil(token2Quantity, 18);
