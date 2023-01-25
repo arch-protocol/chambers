@@ -118,7 +118,7 @@ contract ChamberGodUnitCreateChamberTest is Test {
         _managers = new address[](1);
         _managers[0] = address(owner);
         _wizards = new address[](0);
-        vm.expectRevert("Must have quantities");
+        vm.expectRevert("Elements lengths not equal");
         god.createChamber(_name, _symbol, _constituents, _quantities, _wizards, _managers);
     }
 

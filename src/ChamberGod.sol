@@ -81,7 +81,6 @@ contract ChamberGod is IChamberGod, Owned {
         address[] memory _managers
     ) external returns (address) {
         require(_constituents.length > 0, "Must have constituents");
-        require(_quantities.length > 0, "Must have quantities");
         require(_constituents.length == _quantities.length, "Elements lengths not equal");
         require(!_constituents.hasDuplicate(), "Constituents must be unique");
 
