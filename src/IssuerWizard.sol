@@ -35,10 +35,32 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {PreciseUnitMath} from "./lib/PreciseUnitMath.sol";
 import {IIssuerWizard} from "./interfaces/IIssuerWizard.sol";
+import {IChamberGod} from "./interfaces/IChamberGod.sol";
 
 contract IssuerWizard is IIssuerWizard, ReentrancyGuard {
+    /*//////////////////////////////////////////////////////////////
+                                 CONSTANTS
+    //////////////////////////////////////////////////////////////*/
+
+    IChamberGod private chamberGod;
+
+    /*//////////////////////////////////////////////////////////////
+                                 LIBRARIES
+    //////////////////////////////////////////////////////////////*/
+
     using SafeERC20 for IERC20;
     using PreciseUnitMath for uint256;
+
+    /*//////////////////////////////////////////////////////////////
+                               CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @param _chamberGod        Chamber God
+     */
+    constructor(address _chamberGod) {
+        chamberGod = IChamberGod(_chamberGod);
+    }
 
     /*//////////////////////////////////////////////////////////////
                                FUNCTIONS
@@ -75,6 +97,7 @@ contract IssuerWizard is IIssuerWizard, ReentrancyGuard {
      * @param _quantity Amount of Chamber tokens to be minted
      */
     function issue(IChamber _chamber, uint256 _quantity) external nonReentrant {
+        require(chamberGod.isChamber(address(_chamber)), "Target chamber not valid");
         require(_quantity > 0, "Quantity must be greater than 0");
 
         (address[] memory _constituents, uint256[] memory _requiredConstituentsQuantities) =
@@ -99,6 +122,7 @@ contract IssuerWizard is IIssuerWizard, ReentrancyGuard {
      * @param _quantity Amount of Chamber tokens to be burned
      */
     function redeem(IChamber _chamber, uint256 _quantity) external nonReentrant {
+        require(chamberGod.isChamber(address(_chamber)), "Target chamber not valid");
         require(_quantity > 0, "Quantity must be greater than 0");
         uint256 currentBalance = IERC20(address(_chamber)).balanceOf(msg.sender);
         require(currentBalance >= _quantity, "Not enough balance to redeem");
