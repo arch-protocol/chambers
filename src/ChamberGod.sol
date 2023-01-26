@@ -29,11 +29,12 @@
 pragma solidity ^0.8.17.0;
 
 import {Owned} from "solmate/auth/Owned.sol";
+import {ReentrancyGuard} from "solmate/utils/ReentrancyGuard.sol";
 import {ArrayUtils} from "./lib/ArrayUtils.sol";
 import {Chamber} from "./Chamber.sol";
 import {IChamberGod} from "./interfaces/IChamberGod.sol";
 
-contract ChamberGod is IChamberGod, Owned {
+contract ChamberGod is IChamberGod, Owned, ReentrancyGuard {
     /*//////////////////////////////////////////////////////////////
                               LIBRARIES
     //////////////////////////////////////////////////////////////*/
@@ -79,7 +80,7 @@ contract ChamberGod is IChamberGod, Owned {
         uint256[] memory _quantities,
         address[] memory _wizards,
         address[] memory _managers
-    ) external returns (address) {
+    ) external nonReentrant returns (address) {
         require(_constituents.length > 0, "Must have constituents");
         require(_constituents.length == _quantities.length, "Elements lengths not equal");
         require(!_constituents.hasDuplicate(), "Constituents must be unique");
@@ -159,7 +160,7 @@ contract ChamberGod is IChamberGod, Owned {
      *
      * @param _wizard    The address of the Wizard to add
      */
-    function addWizard(address _wizard) external onlyOwner {
+    function addWizard(address _wizard) external onlyOwner nonReentrant {
         require(_wizard != address(0), "Must be a valid wizard");
         require(!isWizard(address(_wizard)), "Wizard already in ChamberGod");
 
@@ -173,7 +174,7 @@ contract ChamberGod is IChamberGod, Owned {
      *
      * @param _wizard    The address of the Wizard to remove
      */
-    function removeWizard(address _wizard) external onlyOwner {
+    function removeWizard(address _wizard) external onlyOwner nonReentrant {
         require(isWizard(_wizard), "Wizard not valid");
 
         wizards.removeStorage(_wizard);
@@ -195,7 +196,7 @@ contract ChamberGod is IChamberGod, Owned {
      *
      * @param _target    The address of the allowed contract to add
      */
-    function addAllowedContract(address _target) external onlyOwner {
+    function addAllowedContract(address _target) external onlyOwner nonReentrant {
         require(!isAllowedContract(_target), "Contract already allowed");
 
         allowedContracts.push(_target);
@@ -208,7 +209,7 @@ contract ChamberGod is IChamberGod, Owned {
      *
      * @param _target    The address of the allowed contract to remove
      */
-    function removeAllowedContract(address _target) external onlyOwner {
+    function removeAllowedContract(address _target) external onlyOwner nonReentrant {
         require(isAllowedContract(_target), "Contract not allowed");
 
         allowedContracts.removeStorage(_target);

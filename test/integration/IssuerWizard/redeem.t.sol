@@ -8,7 +8,7 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IChamber} from "src/interfaces/IChamber.sol";
 import {IssuerWizard} from "src/IssuerWizard.sol";
 import {Chamber} from "src/Chamber.sol";
-import {ChamberFactory} from "test/utils/factories.sol";
+import {ChamberGod} from "src/ChamberGod.sol";
 import {PreciseUnitMath} from "src/lib/PreciseUnitMath.sol";
 
 contract IssuerWizardIntegrationRedeemTest is Test {
@@ -19,17 +19,19 @@ contract IssuerWizardIntegrationRedeemTest is Test {
     //////////////////////////////////////////////////////////////*/
 
     IssuerWizard public issuerWizard;
-    ChamberFactory public chamberFactory;
     Chamber public globalChamber;
+    ChamberGod public chamberGod;
     address public alice = vm.addr(0xe87809df12a1);
     address public issuerAddress;
     address public chamberAddress;
-    address public chamberGodAddress = vm.addr(0x791782394);
+    address public chamberGodAddress = address(chamberGod);
     address public token1 = 0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39; // HEX on ETH
     address public token2 = 0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e; // YFI on ETH
     address public usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;   // USDC on ETH
     address[] public globalConstituents = new address[](2);
     uint256[] public globalQuantities = new uint256[](2);
+    address[] public wizards = new address[](1);
+    address[] public managers = new address[](1);
 
     event ChamberTokenRedeemed(
         address indexed chamber, address indexed recipient, uint256 quantity
@@ -45,30 +47,24 @@ contract IssuerWizardIntegrationRedeemTest is Test {
         globalConstituents[1] = token2;
         globalQuantities[0] = 1;
         globalQuantities[1] = 2;
-
-        issuerWizard = new IssuerWizard();
+        chamberGod = new ChamberGod();
+        issuerWizard = new IssuerWizard(address(chamberGod));
         issuerAddress = address(issuerWizard);
 
-        address[] memory wizards = new address[](1);
+        chamberGod.addWizard(issuerAddress);
+
         wizards[0] = issuerAddress;
-        address[] memory managers = new address[](1);
         managers[0] = vm.addr(0x92837498ba);
 
-        chamberFactory = new ChamberFactory(
-          address(this),
-          "name",
-          "symbol",
-          wizards,
-          managers
+        globalChamber = Chamber(
+            chamberGod.createChamber(
+                "name", "symbol", globalConstituents, globalQuantities, wizards, managers
+            )
         );
-
-        globalChamber =
-            chamberFactory.getChamberWithCustomTokens(globalConstituents, globalQuantities);
 
         vm.label(chamberGodAddress, "ChamberGod");
         vm.label(issuerAddress, "IssuerWizard");
         vm.label(address(globalChamber), "Chamber");
-        vm.label(address(chamberFactory), "ChamberFactory");
         vm.label(alice, "Alice");
         vm.label(token1, "HEX");
         vm.label(token2, "YFI");
@@ -77,6 +73,20 @@ contract IssuerWizardIntegrationRedeemTest is Test {
     /*//////////////////////////////////////////////////////////////
                               REVERT
     //////////////////////////////////////////////////////////////*/
+
+    /**
+     * [REVERT] Calling redeem() should revert if chamber has not been created by ChamberGod
+     */
+    function testCannotIssueChamberNotCreatedByGod() public {
+        address fakeChamber = vm.addr(0x123456);
+        uint256 previousChamberSupply = IERC20(address(globalChamber)).totalSupply();
+        vm.expectRevert(bytes("Chamber invalid"));
+
+        issuerWizard.redeem(IChamber(address(fakeChamber)), 0);
+
+        uint256 currentChamberSupply = IERC20(address(globalChamber)).totalSupply();
+        assertEq(currentChamberSupply, previousChamberSupply);
+    }
 
     /**
      * [REVERT] Calling redeem() should revert if quantity to redeem is zero
@@ -310,8 +320,12 @@ contract IssuerWizardIntegrationRedeemTest is Test {
         assertEq(IERC20(token1).balanceOf(address(alice)), requiredToken1Collateral);
         assertEq(IERC20(token2).balanceOf(address(alice)), requiredToken2Collateral);
 
-        Chamber chamber =
-            chamberFactory.getChamberWithCustomTokens(globalConstituents, testQuantities);
+        Chamber chamber = Chamber(
+            chamberGod.createChamber(
+                "name", "symbol", globalConstituents, testQuantities, wizards, managers
+            )
+        );
+
         vm.prank(alice);
         ERC20(token1).approve(issuerAddress, requiredToken1Collateral);
         vm.prank(alice);

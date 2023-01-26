@@ -91,6 +91,10 @@ interface IChamber {
 
     function updateQuantities() external;
 
+    function lockChamber() external;
+
+    function unlockChamber() external;
+
     function addAllowedContract(address target) external;
 
     function removeAllowedContract(address target) external;
@@ -103,6 +107,7 @@ interface IChamber {
         address _buyToken,
         uint256 _minBuyQuantity,
         bytes memory _data,
-        address payable _target
+        address payable _target,
+        address _allowanceTarget
     ) external returns (uint256 tokenAmountBought);
 }

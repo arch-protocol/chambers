@@ -6,6 +6,7 @@ import "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IChamber} from "src/interfaces/IChamber.sol";
+import {IChamberGod} from "src/interfaces/IChamberGod.sol";
 import {IssuerWizard} from "src/IssuerWizard.sol";
 import {Chamber} from "src/Chamber.sol";
 import {ChamberFactory} from "test/utils/factories.sol";
@@ -56,7 +57,7 @@ contract StreamingFeeWizardIntegrationCollectStreamingFeeTest is Test {
         globalQuantities[0] = 54;
         globalQuantities[1] = 77;
 
-        issuerWizard = new IssuerWizard();
+        issuerWizard = new IssuerWizard(chamberGodAddress);
         issuerAddress = address(issuerWizard);
 
         streamingFeeWizard = new ExposedStreamingFeeWizard();
@@ -148,6 +149,15 @@ contract StreamingFeeWizardIntegrationCollectStreamingFeeTest is Test {
 
         vm.warp(block.timestamp + 300000); // Let time pass to accumulate fees
 
+        // Mock Call to simulate that the Chamber has been created by ChamberGod
+        vm.mockCall(
+            chamberGodAddress,
+            abi.encodeWithSelector(
+                IChamberGod(chamberGodAddress).isChamber.selector, address(someChamber)
+            ),
+            abi.encode(true)
+        );
+
         vm.expectRevert(bytes("Must be a wizard"));
         streamingFeeWizard.collectStreamingFee(IChamber(address(someChamber)));
 
@@ -173,6 +183,15 @@ contract StreamingFeeWizardIntegrationCollectStreamingFeeTest is Test {
         IERC20(token1).approve(issuerAddress, initialSupply.preciseMulCeil(globalQuantities[0], 18));
         vm.prank(aliceTheSorcerer);
         IERC20(token2).approve(issuerAddress, initialSupply.preciseMulCeil(globalQuantities[1], 18));
+
+        // Mock Call to simulate that the Chamber has been created by ChamberGod
+        vm.mockCall(
+            chamberGodAddress,
+            abi.encodeWithSelector(
+                IChamberGod(chamberGodAddress).isChamber.selector, address(chamberAddress)
+            ),
+            abi.encode(true)
+        );
 
         vm.prank(aliceTheSorcerer);
         issuerWizard.issue(IChamber(chamberAddress), initialSupply);
@@ -244,6 +263,15 @@ contract StreamingFeeWizardIntegrationCollectStreamingFeeTest is Test {
         IERC20(token1).approve(issuerAddress, initialSupply.preciseMulCeil(globalQuantities[0], 18));
         vm.prank(aliceTheSorcerer);
         IERC20(token2).approve(issuerAddress, initialSupply.preciseMulCeil(globalQuantities[1], 18));
+
+        // Mock Call to simulate that the Chamber has been created by ChamberGod
+        vm.mockCall(
+            chamberGodAddress,
+            abi.encodeWithSelector(
+                IChamberGod(chamberGodAddress).isChamber.selector, address(someChamber)
+            ),
+            abi.encode(true)
+        );
 
         vm.prank(aliceTheSorcerer);
         issuerWizard.issue(IChamber(address(someChamber)), initialSupply);
@@ -359,6 +387,15 @@ contract StreamingFeeWizardIntegrationCollectStreamingFeeTest is Test {
         vm.prank(aliceTheSorcerer);
         IERC20(token2).approve(issuerAddress, initialSupply.preciseMulCeil(globalQuantities[1], 18));
 
+        // Mock Call to simulate that the Chamber has been created by ChamberGod
+        vm.mockCall(
+            chamberGodAddress,
+            abi.encodeWithSelector(
+                IChamberGod(chamberGodAddress).isChamber.selector, address(chamberAddress)
+            ),
+            abi.encode(true)
+        );
+
         vm.prank(aliceTheSorcerer);
         issuerWizard.issue(IChamber(chamberAddress), initialSupply);
 
@@ -456,7 +493,16 @@ contract StreamingFeeWizardIntegrationCollectStreamingFeeTest is Test {
         vm.prank(aliceTheSorcerer);
         IERC20(token2).approve(issuerAddress, initialSupply.preciseMulCeil(globalQuantities[1], 18));
 
+        // Mock Call to simulate that the Chamber has been created by ChamberGod
+        vm.mockCall(
+            chamberGodAddress,
+            abi.encodeWithSelector(
+                IChamberGod(chamberGodAddress).isChamber.selector, address(someChamber)
+            ),
+            abi.encode(true)
+        );
         vm.prank(aliceTheSorcerer);
+
         issuerWizard.issue(IChamber(address(someChamber)), initialSupply);
 
         // Time passes

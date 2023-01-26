@@ -6,6 +6,7 @@ import "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IChamber} from "src/interfaces/IChamber.sol";
+import {IChamberGod} from "src/interfaces/IChamberGod.sol";
 import {IIssuerWizard} from "src/interfaces/IIssuerWizard.sol";
 import {IssuerWizard} from "src/IssuerWizard.sol";
 import {PreciseUnitMath} from "src/lib/PreciseUnitMath.sol";
@@ -38,7 +39,7 @@ contract IssuerWizardUnitRedeemTest is Test {
     //////////////////////////////////////////////////////////////*/
 
     function setUp() public {
-        issuerWizard = new IssuerWizard();
+        issuerWizard = new IssuerWizard(chamberGodAddress);
         chamber = IChamber(chamberAddress);
         issuerAddress = address(issuerWizard);
         vm.label(chamberGodAddress, "ChamberGod");
@@ -56,6 +57,22 @@ contract IssuerWizardUnitRedeemTest is Test {
     /*//////////////////////////////////////////////////////////////
                               REVERT
     //////////////////////////////////////////////////////////////*/
+
+    /**
+     * [REVERT] Calling redeem() should revert if the chamber is not in the chambers list at
+     * chamberGod.
+     */
+    function testCannotIssueChamberNotCreatedByGod() public {
+        vm.mockCall(
+            chamberGodAddress,
+            abi.encodeWithSelector(
+                IChamberGod(chamberGodAddress).isChamber.selector, address(chamber)
+            ),
+            abi.encode(false)
+        );
+        vm.expectRevert(bytes("Chamber invalid"));
+        issuerWizard.redeem(IChamber(chamberAddress), 0);
+    }
 
     /**
      * [REVERT] Calling redeem() should revert if quantity to redeem is zero
@@ -77,6 +94,13 @@ contract IssuerWizardUnitRedeemTest is Test {
             chamberAddress,
             abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, (address(this))),
             abi.encode(0)
+        );
+        vm.mockCall(
+            chamberGodAddress,
+            abi.encodeWithSelector(
+                IChamberGod(chamberGodAddress).isChamber.selector, address(chamber)
+            ),
+            abi.encode(true)
         );
         vm.expectRevert(bytes("Quantity must be greater than 0"));
 
@@ -120,6 +144,13 @@ contract IssuerWizardUnitRedeemTest is Test {
             chamberAddress,
             abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, (alice)),
             abi.encode(quantityToRedeem - 1)
+        );
+        vm.mockCall(
+            chamberGodAddress,
+            abi.encodeWithSelector(
+                IChamberGod(chamberGodAddress).isChamber.selector, address(chamber)
+            ),
+            abi.encode(true)
         );
         vm.expectRevert(bytes("Not enough balance to redeem"));
 
@@ -249,6 +280,13 @@ contract IssuerWizardUnitRedeemTest is Test {
             abi.encodeWithSelector(ERC20(address(chamber)).decimals.selector),
             abi.encode(18)
         );
+        vm.mockCall(
+            chamberGodAddress,
+            abi.encodeWithSelector(
+                IChamberGod(chamberGodAddress).isChamber.selector, address(chamber)
+            ),
+            abi.encode(true)
+        );
         vm.expectCall(chamberAddress, abi.encodeCall(IERC20(address(chamber)).balanceOf, (alice)));
         vm.expectCall(chamberAddress, abi.encodeCall(chamber.burn, (alice, quantityToRedeem)));
         vm.expectCall(chamberAddress, abi.encodeCall(chamber.getConstituentsAddresses, ()));
@@ -357,6 +395,13 @@ contract IssuerWizardUnitRedeemTest is Test {
                 chamber.withdrawTo.selector, token2, alice, requiredToken2Collateral
             ),
             abi.encode()
+        );
+        vm.mockCall(
+            chamberGodAddress,
+            abi.encodeWithSelector(
+                IChamberGod(chamberGodAddress).isChamber.selector, address(chamber)
+            ),
+            abi.encode(true)
         );
         vm.expectCall(chamberAddress, abi.encodeCall(chamber.burn, (alice, quantityToRedeem)));
         vm.expectCall(chamberAddress, abi.encodeCall(chamber.getConstituentsAddresses, ()));

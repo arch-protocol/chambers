@@ -77,7 +77,7 @@ contract ChamberUnitExecuteTradeTest is ChamberTestUtils {
      */
     function testCannotExecuteTradeIfNotWizard() public {
         vm.expectRevert("Must be a wizard");
-        chamber.executeTrade(token1, 100 ether, token2, 0, bytes("0x1234"), dexAgg);
+        chamber.executeTrade(token1, 100 ether, token2, 0, bytes("0x1234"), dexAgg, dexAgg);
     }
 
     /**
@@ -100,7 +100,7 @@ contract ChamberUnitExecuteTradeTest is ChamberTestUtils {
 
         vm.expectRevert("Underbought buy quantity");
         vm.prank(wizard);
-        chamber.executeTrade(token1, 1 ether, token2, 1 ether, bytes("0x1234"), dexAgg);
+        chamber.executeTrade(token1, 1 ether, token2, 1 ether, bytes("0x1234"), dexAgg, dexAgg);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -134,6 +134,6 @@ contract ChamberUnitExecuteTradeTest is ChamberTestUtils {
         vm.expectCall(dexAgg, bytes("0x1234"));
 
         vm.prank(wizard);
-        chamber.executeTrade(token1, 1 ether, token2, 0, bytes("0x1234"), dexAgg);
+        chamber.executeTrade(token1, 1 ether, token2, 0, bytes("0x1234"), dexAgg, dexAgg);
     }
 }

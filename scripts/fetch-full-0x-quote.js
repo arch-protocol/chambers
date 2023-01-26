@@ -14,7 +14,7 @@ async function main(amount, sellToken, buyToken){
   try{
     const response = await axios.get(quoteUrl)
     const {data} = response
-    const encodedData = encoder.encode(["bytes", "uint256", "address"], [data.data, data.buyAmount, data.to])
+    const encodedData = encoder.encode(["bytes", "uint256", "address", "address"], [data.data, data.buyAmount, data.to, data.allowanceTarget])
     process.stdout.write(encodedData)
   } catch(error) {
     console.log(error)

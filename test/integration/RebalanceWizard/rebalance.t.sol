@@ -25,7 +25,7 @@ contract RebalanceWizardIntegrationRebalanceTest is ChamberTestUtils {
                               VARIABLES
     //////////////////////////////////////////////////////////////*/
 
-    IChamber chamber;
+    IChamber private chamber;
     IssuerWizard private issuer;
     RebalanceWizard private rebalancer;
     ChamberGod private god;
@@ -45,10 +45,6 @@ contract RebalanceWizardIntegrationRebalanceTest is ChamberTestUtils {
     //////////////////////////////////////////////////////////////*/
 
     function setUp() public {
-        issuer = new IssuerWizard();
-        rebalancer = new RebalanceWizard();
-        vm.label(address(issuer), "Issuer");
-        vm.label(address(rebalancer), "Rebalancer");
         constituents = new address[](1);
         quantities = new uint256[](1);
         wizards = new address[](2);
@@ -56,6 +52,10 @@ contract RebalanceWizardIntegrationRebalanceTest is ChamberTestUtils {
         owner = vm.addr(0x2);
         vm.startPrank(owner);
         god = new ChamberGod();
+        issuer = new IssuerWizard(address(god));
+        rebalancer = new RebalanceWizard();
+        vm.label(address(issuer), "Issuer");
+        vm.label(address(rebalancer), "Rebalancer");
         god.addWizard(address(issuer));
         god.addWizard(address(rebalancer));
         wizards[0] = address(issuer);
@@ -110,16 +110,23 @@ contract RebalanceWizardIntegrationRebalanceTest is ChamberTestUtils {
 
         data = abi.encodeWithSignature("withdraw(uint256)", sharesToSell);
         IRebalanceWizard.RebalanceParams memory withdrawParams = IRebalanceWizard.RebalanceParams(
-            chamber, yvUSDC, sharesToSell, usdc, expectedUSDC, payable(yvUSDC), data
+            chamber, yvUSDC, sharesToSell, usdc, expectedUSDC, yvUSDC, payable(yvUSDC), data
         );
         trades[0] = withdrawParams;
 
         // Data for the second trade (Swap in 0x USDC for USDT)
-        (bytes memory quotes, uint256 buyAmount, address target) =
-            getCompleteQuoteData(usdc, expectedUSDC, usdt);
+        CompleteQuoteResponse memory response =
+            getCompleteQuoteData(CompleteQuoteParams(usdc, expectedUSDC, usdt));
 
         IRebalanceWizard.RebalanceParams memory swapParams = IRebalanceWizard.RebalanceParams(
-            chamber, usdc, expectedUSDC, usdt, buyAmount, payable(target), quotes
+            chamber,
+            usdc,
+            expectedUSDC,
+            usdt,
+            response._buyAmount,
+            response._allowanceTarget,
+            payable(response._target),
+            response._quotes
         );
         trades[1] = swapParams;
 
@@ -130,18 +137,25 @@ contract RebalanceWizardIntegrationRebalanceTest is ChamberTestUtils {
         require(success, "Failed to get pricePerShare");
 
         price = abi.decode(result, (uint256));
-        uint256 expectedShares = buyAmount.preciseDiv(price, 6);
+        uint256 expectedShares = response._buyAmount.preciseDiv(price, 6);
         expectedShares = expectedShares * 995 / 1000;
 
-        data = abi.encodeWithSignature("deposit(uint256)", buyAmount);
+        data = abi.encodeWithSignature("deposit(uint256)", response._buyAmount);
         IRebalanceWizard.RebalanceParams memory depositParams = IRebalanceWizard.RebalanceParams(
-            chamber, usdt, buyAmount, yvUSDT, expectedShares, payable(yvUSDT), data
+            chamber,
+            usdt,
+            response._buyAmount,
+            yvUSDT,
+            expectedShares,
+            yvUSDT,
+            payable(yvUSDT),
+            data
         );
         trades[2] = depositParams;
 
         vm.startPrank(owner);
-        god.addAllowedContract(target);
-        chamber.addAllowedContract(target);
+        god.addAllowedContract(response._target);
+        chamber.addAllowedContract(response._target);
         rebalancer.rebalance(trades);
         vm.stopPrank();
     }

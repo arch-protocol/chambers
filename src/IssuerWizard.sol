@@ -35,10 +35,32 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {PreciseUnitMath} from "./lib/PreciseUnitMath.sol";
 import {IIssuerWizard} from "./interfaces/IIssuerWizard.sol";
+import {IChamberGod} from "./interfaces/IChamberGod.sol";
 
 contract IssuerWizard is IIssuerWizard, ReentrancyGuard {
+    /*//////////////////////////////////////////////////////////////
+                                 CONSTANTS
+    //////////////////////////////////////////////////////////////*/
+
+    IChamberGod private chamberGod;
+
+    /*//////////////////////////////////////////////////////////////
+                                 LIBRARIES
+    //////////////////////////////////////////////////////////////*/
+
     using SafeERC20 for IERC20;
     using PreciseUnitMath for uint256;
+
+    /*//////////////////////////////////////////////////////////////
+                               CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @param _chamberGod        Chamber God
+     */
+    constructor(address _chamberGod) {
+        chamberGod = IChamberGod(_chamberGod);
+    }
 
     /*//////////////////////////////////////////////////////////////
                                FUNCTIONS
@@ -99,8 +121,10 @@ contract IssuerWizard is IIssuerWizard, ReentrancyGuard {
      * @param _quantity Amount of Chamber tokens to be minted
      */
     function issue(IChamber _chamber, uint256 _quantity) external nonReentrant {
+        require(chamberGod.isChamber(address(_chamber)), "Chamber invalid");
         require(_quantity > 0, "Quantity must be greater than 0");
-
+        _chamber.lockChamber();
+        _chamber.mint(msg.sender, _quantity);
         (address[] memory _constituents, uint256[] memory _requiredConstituentsQuantities) =
             getConstituentsQuantitiesForIssuance(_chamber, _quantity);
 
@@ -110,8 +134,7 @@ contract IssuerWizard is IIssuerWizard, ReentrancyGuard {
                 msg.sender, address(_chamber), _requiredConstituentsQuantities[i]
             );
         }
-        _chamber.mint(msg.sender, _quantity);
-
+        _chamber.unlockChamber();
         emit ChamberTokenIssued(address(_chamber), msg.sender, _quantity);
     }
 
@@ -123,7 +146,9 @@ contract IssuerWizard is IIssuerWizard, ReentrancyGuard {
      * @param _quantity Amount of Chamber tokens to be burned
      */
     function redeem(IChamber _chamber, uint256 _quantity) external nonReentrant {
+        require(chamberGod.isChamber(address(_chamber)), "Chamber invalid");
         require(_quantity > 0, "Quantity must be greater than 0");
+        _chamber.lockChamber();
         uint256 currentBalance = IERC20(address(_chamber)).balanceOf(msg.sender);
         require(currentBalance >= _quantity, "Not enough balance to redeem");
 
@@ -136,7 +161,7 @@ contract IssuerWizard is IIssuerWizard, ReentrancyGuard {
             address constituent = _constituents[i];
             _chamber.withdrawTo(constituent, msg.sender, _requiredConstituentsQuantities[i]);
         }
-
+        _chamber.unlockChamber();
         emit ChamberTokenRedeemed(address(_chamber), msg.sender, _quantity);
     }
 }
