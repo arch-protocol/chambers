@@ -68,7 +68,7 @@ contract IssuerWizardUnitIssueTest is Test {
             ),
             abi.encode(false)
         );
-        vm.expectRevert(bytes("Target chamber not valid"));
+        vm.expectRevert(bytes("Chamber invalid"));
         issuerWizard.issue(IChamber(chamberAddress), 0);
     }
 

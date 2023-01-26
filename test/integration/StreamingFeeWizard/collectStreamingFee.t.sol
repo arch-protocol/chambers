@@ -149,7 +149,7 @@ contract StreamingFeeWizardIntegrationCollectStreamingFeeTest is Test {
 
         vm.warp(block.timestamp + 300000); // Let time pass to accumulate fees
 
-        // Mock Call to simulate that the Chamber Has been Created by ChamberGod
+        // Mock Call to simulate that the Chamber has been created by ChamberGod
         vm.mockCall(
             chamberGodAddress,
             abi.encodeWithSelector(
@@ -184,7 +184,7 @@ contract StreamingFeeWizardIntegrationCollectStreamingFeeTest is Test {
         vm.prank(aliceTheSorcerer);
         IERC20(token2).approve(issuerAddress, initialSupply.preciseMulCeil(globalQuantities[1], 18));
 
-        // Mock Call to simulate that the Chamber Has been Created by ChamberGod
+        // Mock Call to simulate that the Chamber has been created by ChamberGod
         vm.mockCall(
             chamberGodAddress,
             abi.encodeWithSelector(
@@ -264,7 +264,7 @@ contract StreamingFeeWizardIntegrationCollectStreamingFeeTest is Test {
         vm.prank(aliceTheSorcerer);
         IERC20(token2).approve(issuerAddress, initialSupply.preciseMulCeil(globalQuantities[1], 18));
 
-        // Mock Call to simulate that the Chamber Has been Created by ChamberGod
+        // Mock Call to simulate that the Chamber has been created by ChamberGod
         vm.mockCall(
             chamberGodAddress,
             abi.encodeWithSelector(
@@ -387,7 +387,7 @@ contract StreamingFeeWizardIntegrationCollectStreamingFeeTest is Test {
         vm.prank(aliceTheSorcerer);
         IERC20(token2).approve(issuerAddress, initialSupply.preciseMulCeil(globalQuantities[1], 18));
 
-        // Mock Call to simulate that the Chamber Has been Created by ChamberGod
+        // Mock Call to simulate that the Chamber has been created by ChamberGod
         vm.mockCall(
             chamberGodAddress,
             abi.encodeWithSelector(
@@ -493,7 +493,7 @@ contract StreamingFeeWizardIntegrationCollectStreamingFeeTest is Test {
         vm.prank(aliceTheSorcerer);
         IERC20(token2).approve(issuerAddress, initialSupply.preciseMulCeil(globalQuantities[1], 18));
 
-        // Mock Call to simulate that the Chamber Has been Created by ChamberGod
+        // Mock Call to simulate that the Chamber has been created by ChamberGod
         vm.mockCall(
             chamberGodAddress,
             abi.encodeWithSelector(

@@ -97,7 +97,7 @@ contract IssuerWizard is IIssuerWizard, ReentrancyGuard {
      * @param _quantity Amount of Chamber tokens to be minted
      */
     function issue(IChamber _chamber, uint256 _quantity) external nonReentrant {
-        require(chamberGod.isChamber(address(_chamber)), "Target chamber not valid");
+        require(chamberGod.isChamber(address(_chamber)), "Chamber invalid");
         require(_quantity > 0, "Quantity must be greater than 0");
         _chamber.lockChamber();
         _chamber.mint(msg.sender, _quantity);
@@ -122,7 +122,7 @@ contract IssuerWizard is IIssuerWizard, ReentrancyGuard {
      * @param _quantity Amount of Chamber tokens to be burned
      */
     function redeem(IChamber _chamber, uint256 _quantity) external nonReentrant {
-        require(chamberGod.isChamber(address(_chamber)), "Target chamber not valid");
+        require(chamberGod.isChamber(address(_chamber)), "Chamber invalid");
         require(_quantity > 0, "Quantity must be greater than 0");
         _chamber.lockChamber();
         uint256 currentBalance = IERC20(address(_chamber)).balanceOf(msg.sender);

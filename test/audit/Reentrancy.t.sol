@@ -10,6 +10,9 @@ import {StreamingFeeWizard, IStreamingFeeWizard} from "src/StreamingFeeWizard.so
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {console} from "forge-std/console.sol";
 
+/**
+ * ERC20 with _afterTokenTransfer hook implemented. It makes a callback function after every transfer.
+ */
 contract ERC20WithCallback is ERC20("", "") {
     address public callback;
 
@@ -22,6 +25,10 @@ contract ERC20WithCallback is ERC20("", "") {
         success;
     }
 }
+/**
+ * Malicious contract that tries to call collectStreamingFees function at fallback.
+ * This contract is called by the ERC20WithCallback contract and will try to perform an attack.
+ */
 
 contract HackyWacky {
     StreamingFeeWizard feeWiz;
@@ -46,7 +53,6 @@ contract HackyWacky {
 }
 
 contract Reentrancy is Test {
-    uint256 constant FORK_BLOCK_NUMBER = 16_421_844;
     ERC20 constant WETH = ERC20(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
 
     ChamberGod god;
@@ -60,8 +66,6 @@ contract Reentrancy is Test {
     address bob;
 
     function setUp() public {
-        //vm.createSelectFork(vm.rpcUrl("mainnet"), FORK_BLOCK_NUMBER);
-
         owner = makeAddr("OWNER");
         manager = makeAddr("MANAGER");
         alice = makeAddr("ALICE");
@@ -82,6 +86,16 @@ contract Reentrancy is Test {
         vm.stopPrank();
     }
 
+    /*//////////////////////////////////////////////////////////////
+                              SUCCESS
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * [SUCCESS] Will try to perform a call to collectStreamingFees and update the constituents
+     * quantities at the Chamber. This will not result in a revert but the call to streaming fees
+     * will have no effect on the constituentsQuantities array since updateQuantities will be locked
+     * while issuing new tokens at the issuerWizard.
+     */
     function testIssueReentrancy() public {
         HackyWacky callback = new HackyWacky(streamingFee);
         ERC20WithCallback callbackToken = new ERC20WithCallback(address(callback));
@@ -172,6 +186,12 @@ contract Reentrancy is Test {
         vm.stopPrank();
     }
 
+    /**
+     * [SUCCESS] Will try to perform a call to collectStreamingFees and update the constituents
+     * quantities at the Chamber. This will not result in a revert but the call to streaming fees
+     * will have no effect on the constituentsQuantities array since updateQuantities and minting
+     * will be locked while redeeming tokens at the issuerWizard.
+     */
     function testRedeemReentrancy() public {
         HackyWacky callback = new HackyWacky(streamingFee);
         ERC20WithCallback callbackToken = new ERC20WithCallback(address(callback));
