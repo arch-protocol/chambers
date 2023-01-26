@@ -143,6 +143,72 @@ contract IssuerWizardUnitRedeemTest is Test {
         assertEq(currentAliceBalance, previousAliceBalance);
     }
 
+    /**
+     * [REVERT] Cannor redeem tokens without receiving at least 1 wei of every constituents,
+     * when all constituents have zero as quantity. This scenario should not occur thanks
+     * to validations in other contracts.
+     */
+    function testCannotRedeemBurnInfiniteTokensWithZeroQuantityInContituents(uint256 quantityToRedeem)
+        public
+    {
+        vm.assume(quantityToRedeem > 0);
+
+        vm.mockCall(
+            chamberAddress,
+            abi.encodeWithSelector(IERC20(address(chamber)).totalSupply.selector),
+            abi.encode(quantityToRedeem)
+        );
+
+        vm.mockCall(
+            chamberAddress,
+            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, alice),
+            abi.encode(quantityToRedeem)
+        );
+        vm.mockCall(
+            chamberAddress,
+            abi.encodeWithSelector(chamber.burn.selector, alice, quantityToRedeem),
+            abi.encode()
+        );
+        vm.mockCall(
+            chamberAddress,
+            abi.encodeWithSelector(chamber.getConstituentsAddresses.selector),
+            abi.encode(globalConstituents)
+        );
+        vm.mockCall(
+            chamberAddress,
+            abi.encodeWithSelector(ERC20(address(chamber)).decimals.selector),
+            abi.encode(18)
+        );
+        vm.mockCall(
+            chamberAddress,
+            abi.encodeWithSelector(chamber.getConstituentQuantity.selector, token1),
+            abi.encode(0)
+        );
+        vm.mockCall(
+            chamberAddress,
+            abi.encodeWithSelector(chamber.getConstituentQuantity.selector, token2),
+            abi.encode(0)
+        );
+
+        vm.expectRevert(bytes("Redeem amount too low"));
+        vm.prank(alice);
+        issuerWizard.redeem(IChamber(chamberAddress), quantityToRedeem);
+
+        vm.mockCall(
+            chamberAddress,
+            abi.encodeWithSelector(IERC20(address(chamber)).totalSupply.selector),
+            abi.encode(quantityToRedeem)
+        );
+        vm.mockCall(
+            chamberAddress,
+            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, alice),
+            abi.encode(quantityToRedeem)
+        );
+
+        assertEq(IERC20(chamberAddress).totalSupply(), quantityToRedeem);
+        assertEq(IERC20(chamberAddress).balanceOf(alice), quantityToRedeem);
+    }
+
     /*//////////////////////////////////////////////////////////////
                               SUCCESS
     //////////////////////////////////////////////////////////////*/
@@ -210,88 +276,6 @@ contract IssuerWizardUnitRedeemTest is Test {
     }
 
     /**
-     * [SUCESS] Should burn an *infinite* amount of tokens without receiving any constituents,
-     * when all constituents have zero as quantity. This scenario should not occur thanks
-     * to validations in other contracts.
-     */
-    function testRedeemBurnInfiniteTokensWithZeroQuantityInContituents(uint256 quantityToRedeem)
-        public
-    {
-        vm.assume(quantityToRedeem > 0);
-
-        vm.mockCall(
-            chamberAddress,
-            abi.encodeWithSelector(IERC20(address(chamber)).totalSupply.selector),
-            abi.encode(quantityToRedeem)
-        );
-        uint256 previousChamberSupply = IERC20(address(chamber)).totalSupply();
-
-        vm.mockCall(
-            chamberAddress,
-            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, alice),
-            abi.encode(quantityToRedeem)
-        );
-        vm.mockCall(
-            chamberAddress,
-            abi.encodeWithSelector(chamber.burn.selector, alice, quantityToRedeem),
-            abi.encode()
-        );
-        vm.mockCall(
-            chamberAddress,
-            abi.encodeWithSelector(chamber.getConstituentsAddresses.selector),
-            abi.encode(globalConstituents)
-        );
-        vm.mockCall(
-            chamberAddress,
-            abi.encodeWithSelector(ERC20(address(chamber)).decimals.selector),
-            abi.encode(18)
-        );
-        vm.mockCall(
-            chamberAddress,
-            abi.encodeWithSelector(chamber.getConstituentQuantity.selector, token1),
-            abi.encode(0)
-        );
-        vm.mockCall(
-            chamberAddress,
-            abi.encodeWithSelector(chamber.getConstituentQuantity.selector, token2),
-            abi.encode(0)
-        );
-        vm.mockCall(
-            chamberAddress,
-            abi.encodeWithSelector(chamber.withdrawTo.selector, token1, alice, 0),
-            abi.encode()
-        );
-        vm.mockCall(
-            chamberAddress,
-            abi.encodeWithSelector(chamber.withdrawTo.selector, token2, alice, 0),
-            abi.encode()
-        );
-        vm.expectCall(chamberAddress, abi.encodeCall(chamber.burn, (alice, quantityToRedeem)));
-        vm.expectCall(chamberAddress, abi.encodeCall(chamber.getConstituentsAddresses, ()));
-        vm.expectEmit(true, true, false, true, address(issuerWizard));
-        emit ChamberTokenRedeemed(chamberAddress, alice, quantityToRedeem);
-
-        vm.prank(alice);
-        issuerWizard.redeem(IChamber(chamberAddress), quantityToRedeem);
-
-        vm.mockCall(
-            chamberAddress,
-            abi.encodeWithSelector(IERC20(address(chamber)).totalSupply.selector),
-            abi.encode(0)
-        );
-        vm.mockCall(
-            chamberAddress,
-            abi.encodeWithSelector(IERC20(address(chamber)).balanceOf.selector, alice),
-            abi.encode(0)
-        );
-        uint256 currentChamberSupply = IERC20(chamberAddress).totalSupply();
-        uint256 currentAliceBalance = IERC20(chamberAddress).balanceOf(alice);
-
-        assertEq(currentChamberSupply, previousChamberSupply - quantityToRedeem);
-        assertEq(currentAliceBalance, 0);
-    }
-
-    /**
      * [SUCCESS] Should return the constituents to the msg.sender when the redeem() function
      * is executed under normal circumstances.
      */
@@ -300,12 +284,12 @@ contract IssuerWizardUnitRedeemTest is Test {
         uint256 token1Quantity,
         uint256 token2Quantity
     ) public {
-        vm.assume(quantityToRedeem > 0);
-        vm.assume(quantityToRedeem < type(uint160).max);
         vm.assume(token1Quantity > 0);
-        vm.assume(token1Quantity < type(uint64).max);
+        vm.assume(token1Quantity < 1 ether);
         vm.assume(token2Quantity > 0);
-        vm.assume(token2Quantity < type(uint64).max);
+        vm.assume(token2Quantity < 1 ether);
+        vm.assume(quantityToRedeem > 1 ether);
+        vm.assume(quantityToRedeem < type(uint160).max);
 
         uint256 requiredToken1Collateral = quantityToRedeem.preciseMulCeil(token1Quantity, 18);
         uint256 requiredToken2Collateral = quantityToRedeem.preciseMulCeil(token2Quantity, 18);
@@ -382,24 +366,19 @@ contract IssuerWizardUnitRedeemTest is Test {
         vm.prank(alice);
         issuerWizard.redeem(IChamber(chamberAddress), quantityToRedeem);
         vm.prank(chamberAddress);
-        IERC20(token1).transfer(alice, requiredToken1Collateral);
+        IERC20(token1).transfer(alice, quantityToRedeem.preciseMul(token1Quantity, 18));
         vm.prank(chamberAddress);
-        IERC20(token2).transfer(alice, requiredToken2Collateral);
+        IERC20(token2).transfer(alice, quantityToRedeem.preciseMul(token2Quantity, 18));
 
         vm.mockCall(
             chamberAddress,
             abi.encodeWithSelector(IERC20(address(chamber)).totalSupply.selector),
             abi.encode(0)
         );
-        uint256 currentChamberSupply = IERC20(address(chamber)).totalSupply();
-        uint256 currentChamberToken1Balance = IERC20(token1).balanceOf(chamberAddress);
-        uint256 currentChamberToken2Balance = IERC20(token2).balanceOf(chamberAddress);
-        uint256 currentAliceToken1Balance = IERC20(token1).balanceOf(alice);
-        uint256 currentAliceToken2Balance = IERC20(token2).balanceOf(alice);
-        assertEq(currentChamberSupply, 0);
-        assertEq(currentAliceToken1Balance, requiredToken1Collateral);
-        assertEq(currentAliceToken2Balance, requiredToken2Collateral);
-        assertEq(currentChamberToken1Balance, 0);
-        assertEq(currentChamberToken2Balance, 0);
+        assertEq(IERC20(address(chamber)).totalSupply(), 0);
+        assertEq(IERC20(token1).balanceOf(alice), quantityToRedeem.preciseMul(token1Quantity, 18));
+        assertEq(IERC20(token2).balanceOf(alice), quantityToRedeem.preciseMul(token2Quantity, 18));
+        assertEq(IERC20(token1).balanceOf(chamberAddress), requiredToken1Collateral - quantityToRedeem.preciseMul(token1Quantity, 18));
+        assertEq(IERC20(token2).balanceOf(chamberAddress), requiredToken2Collateral - quantityToRedeem.preciseMul(token2Quantity, 18));
     }
 }
