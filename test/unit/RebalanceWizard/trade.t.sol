@@ -62,7 +62,7 @@ contract RebalanceWizardUnitTradeTest is ChamberTestUtils {
         bytes memory quotes = bytes(abi.encode(buyAmount));
         address target = vm.addr(0x123123);
         params = IRebalanceWizard.RebalanceParams(
-            chamber, usdc, sellAmount, dai, buyAmount, payable(target), quotes
+            chamber, usdc, sellAmount, dai, buyAmount, target, payable(target), quotes
         );
         vm.mockCall(
             chamberAddress,
@@ -82,7 +82,7 @@ contract RebalanceWizardUnitTradeTest is ChamberTestUtils {
         bytes memory quotes = bytes(abi.encode(buyAmount));
         address target = vm.addr(0x123123);
         params = IRebalanceWizard.RebalanceParams(
-            chamber, usdc, sellAmount, dai, buyAmount, payable(target), quotes
+            chamber, usdc, sellAmount, dai, buyAmount, target, payable(target), quotes
         );
         vm.expectRevert("Sell quantity must be > 0");
         vm.prank(owner);
@@ -98,7 +98,7 @@ contract RebalanceWizardUnitTradeTest is ChamberTestUtils {
         bytes memory quotes = bytes(abi.encode(buyAmount));
         address target = vm.addr(0x123123);
         params = IRebalanceWizard.RebalanceParams(
-            chamber, usdc, sellAmount, dai, buyAmount, payable(target), quotes
+            chamber, usdc, sellAmount, dai, buyAmount, target, payable(target), quotes
         );
         vm.mockCall(
             chamberAddress,
@@ -123,7 +123,7 @@ contract RebalanceWizardUnitTradeTest is ChamberTestUtils {
         bytes memory quotes = bytes(abi.encode(buyAmount));
         address target = vm.addr(0x123123);
         params = IRebalanceWizard.RebalanceParams(
-            chamber, usdc, sellAmount, dai, buyAmount, payable(target), quotes
+            chamber, usdc, sellAmount, dai, buyAmount, target, payable(target), quotes
         );
         vm.expectRevert("Min. buy quantity must be > 0");
         vm.prank(owner);
@@ -139,7 +139,7 @@ contract RebalanceWizardUnitTradeTest is ChamberTestUtils {
         bytes memory quotes = bytes(abi.encode(buyAmount));
         address target = vm.addr(0x123123);
         params = IRebalanceWizard.RebalanceParams(
-            chamber, usdc, sellAmount, usdc, buyAmount, payable(target), quotes
+            chamber, usdc, sellAmount, usdc, buyAmount, target, payable(target), quotes
         );
         vm.expectRevert("Traded tokens must be different");
         vm.prank(owner);
@@ -155,7 +155,7 @@ contract RebalanceWizardUnitTradeTest is ChamberTestUtils {
         bytes memory quotes = bytes(abi.encode(buyAmount));
         address target = vm.addr(0x123123);
         params = IRebalanceWizard.RebalanceParams(
-            chamber, yvUSDC, sellAmount, dai, buyAmount, payable(target), quotes
+            chamber, yvUSDC, sellAmount, dai, buyAmount, target, payable(target), quotes
         );
         vm.mockCall(
             chamberAddress,

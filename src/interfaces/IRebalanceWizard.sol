@@ -41,6 +41,7 @@ interface IRebalanceWizard {
         uint256 _sellQuantity;
         address _buyToken;
         uint256 _minBuyQuantity;
+        address _allowanceTarget;
         address payable _target;
         bytes _data;
     }

@@ -93,7 +93,8 @@ contract RebalanceWizard is ReentrancyGuard, IRebalanceWizard {
             params._buyToken,
             params._minBuyQuantity,
             params._data,
-            params._target
+            params._target,
+            params._allowanceTarget
         );
 
         params._chamber.updateQuantities();
