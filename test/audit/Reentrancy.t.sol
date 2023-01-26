@@ -123,6 +123,11 @@ contract Reentrancy is Test {
         vm.warp(block.timestamp + 1);
 
         // BOB / Attack
+        //[ARCH] save balances to check that they remain unchanged after attack attempt
+        uint256 bobWethBalanceBefore = callbackToken.balanceOf(bob);
+        uint256 bobChamberBalanceBefore = chamber.balanceOf(bob);
+        uint256 constituentQuantityBefore = chamber.getConstituentQuantity(address(WETH));
+        uint256 chamberWethBalanceBefore = callbackToken.balanceOf(address(chamber));
 
         console.log("Bob's token balance    ", callbackToken.balanceOf(bob));
         console.log("Bob's chamber balance  ", chamber.balanceOf(bob));
@@ -158,6 +163,11 @@ contract Reentrancy is Test {
             "Constituent quantity   ", chamber.getConstituentQuantity(address(callbackToken))
         );
         console.log("Chamber's token balance", callbackToken.balanceOf(address(chamber)));
+
+        assertEq(bobWethBalanceBefore, callbackToken.balanceOf(bob));
+        assertEq(bobChamberBalanceBefore, chamber.balanceOf(bob));
+        assertEq(constituentQuantityBefore, chamber.getConstituentQuantity(address(WETH)));
+        assertEq(chamberWethBalanceBefore, callbackToken.balanceOf(address(chamber)));
 
         vm.stopPrank();
     }
@@ -208,6 +218,11 @@ contract Reentrancy is Test {
         vm.warp(block.timestamp + 1);
 
         // BOB / Attack
+        //[ARCH] save balances to check that they remain unchanged after attack attempt
+        uint256 bobWethBalanceBefore = WETH.balanceOf(bob);
+        uint256 bobChamberBalanceBefore = chamber.balanceOf(bob);
+        uint256 constituentQuantityBefore = chamber.getConstituentQuantity(address(WETH));
+        uint256 chamberWethBalanceBefore = WETH.balanceOf(address(chamber));
 
         console.log("Bob's WETH balance     ", WETH.balanceOf(bob));
         console.log("Bob's chamber balance  ", chamber.balanceOf(bob));
@@ -247,6 +262,11 @@ contract Reentrancy is Test {
         console.log("Bob's chamber balance  ", chamber.balanceOf(bob));
         console.log("Constituent quantity   ", chamber.getConstituentQuantity(address(WETH)));
         console.log("Chamber's WETH balance ", WETH.balanceOf(address(chamber)));
+
+        assertEq(bobWethBalanceBefore, WETH.balanceOf(bob));
+        assertEq(bobChamberBalanceBefore, chamber.balanceOf(bob));
+        assertEq(constituentQuantityBefore, chamber.getConstituentQuantity(address(WETH)));
+        assertEq(chamberWethBalanceBefore, WETH.balanceOf(address(chamber)));
 
         vm.stopPrank();
     }
