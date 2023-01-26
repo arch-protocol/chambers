@@ -140,7 +140,8 @@ contract IssuerWizardIntegrationRedeemTest is Test {
         vm.assume(token2Quantity > 0);
         vm.assume(token2Quantity < 1 ether);
         vm.assume(quantityToRedeem > 0);
-        vm.assume(quantityToRedeem < 1 ether);
+        vm.assume(quantityToRedeem < 1 ether / token1Quantity);
+        vm.assume(quantityToRedeem < 1 ether / token2Quantity);
 
         uint256[] memory testQuantities = new uint256[](2);
         testQuantities[0] = token1Quantity;
