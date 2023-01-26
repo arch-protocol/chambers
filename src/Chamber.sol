@@ -382,7 +382,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
     }
 
     /**
-     * Locks the chamber from the outside to prevent malicious reentrancy calls from contracts
+     * Unlocks the chamber from potentially malicious outside calls of contracts
      * that were not created by arch-protocol
      */
     function unlockChamber() external onlyWizard nonReentrant {
