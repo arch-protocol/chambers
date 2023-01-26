@@ -69,6 +69,8 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
 
     address[] public allowedContracts;
 
+    uint8 private chamberLocked = 1;
+
     /*//////////////////////////////////////////////////////////////
                                 MODIFIERS
     //////////////////////////////////////////////////////////////*/
@@ -83,6 +85,13 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
         require(isWizard(msg.sender), "Must be a wizard");
 
         _;
+    }
+
+    modifier chambersNonReentrant() virtual {
+        require(chamberLocked == 1, "Non reentrancy allowed");
+        chamberLocked = 2;
+        _;
+        chamberLocked = 1;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -364,6 +373,24 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
     }
 
     /**
+     * Locks the chamber from the outside to prevent malicious reentrancy calls from contracts
+     * that were not created by arch-protocol
+     */
+    function lockChamber() external onlyWizard nonReentrant {
+        require(chamberLocked == 1, "Chamber locked");
+        chamberLocked = 2;
+    }
+
+    /**
+     * Locks the chamber from the outside to prevent malicious reentrancy calls from contracts
+     * that were not created by arch-protocol
+     */
+    function unlockChamber() external onlyWizard nonReentrant {
+        require(chamberLocked == 2, "Chamber unlocked");
+        chamberLocked = 1;
+    }
+
+    /**
      * Allows a wizard to transfer an specific amount of constituent tokens
      * to a recipient
      *
@@ -374,6 +401,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
     function withdrawTo(address _constituent, address _recipient, uint256 _quantity)
         external
         onlyWizard
+        nonReentrant
     {
         if (_quantity > 0) {
             // Retrieve current balance of token for the vault
@@ -399,7 +427,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
      * list. Used by wizards. E.g. after an uncollateralized mint in the streaming fee wizard .
      *
      */
-    function updateQuantities() external onlyWizard nonReentrant {
+    function updateQuantities() external onlyWizard nonReentrant chambersNonReentrant {
         uint256 totalSupply = IERC20(address(this)).totalSupply();
         uint256 decimals = ERC20(address(this)).decimals();
         for (uint256 i = 0; i < constituents.length; i++) {
