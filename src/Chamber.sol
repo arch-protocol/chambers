@@ -137,7 +137,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
      *
      * @param _constituent The address of the constituent to add
      */
-    function addConstituent(address _constituent) external onlyWizard {
+    function addConstituent(address _constituent) external onlyWizard nonReentrant {
         require(!isConstituent(_constituent), "Must not be constituent");
 
         constituents.push(_constituent);
@@ -150,7 +150,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
      *
      * @param _constituent The address of the constituent to remove
      */
-    function removeConstituent(address _constituent) external onlyWizard {
+    function removeConstituent(address _constituent) external onlyWizard nonReentrant {
         require(isConstituent(_constituent), "Must be constituent");
 
         constituents.removeStorage(_constituent);
@@ -196,7 +196,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
      *
      * @param _manager The address of the manager to add
      */
-    function addManager(address _manager) external onlyOwner {
+    function addManager(address _manager) external onlyOwner nonReentrant {
         require(!isManager(_manager), "Already manager");
         require(_manager != address(0), "Cannot add null address");
 
@@ -210,7 +210,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
      *
      * @param _manager The address of the manager to remove
      */
-    function removeManager(address _manager) external onlyOwner {
+    function removeManager(address _manager) external onlyOwner nonReentrant {
         require(isManager(_manager), "Not a manager");
 
         managers.removeStorage(_manager);
@@ -223,7 +223,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
      *
      * @param _wizard The address of the wizard to add
      */
-    function addWizard(address _wizard) external onlyManager {
+    function addWizard(address _wizard) external onlyManager nonReentrant {
         require(god.isWizard(_wizard), "Wizard not validated in ChamberGod");
         require(!isWizard(_wizard), "Wizard already in Chamber");
 
@@ -237,7 +237,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
      *
      * @param _wizard The address of the wizard to remove
      */
-    function removeWizard(address _wizard) external onlyManager {
+    function removeWizard(address _wizard) external onlyManager nonReentrant {
         require(isWizard(_wizard), "Wizard not in chamber");
 
         wizards.removeStorage(_wizard);
@@ -313,7 +313,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
      *
      * @param _target The address of the allowedContract to add
      */
-    function addAllowedContract(address _target) external onlyManager {
+    function addAllowedContract(address _target) external onlyManager nonReentrant {
         require(god.isAllowedContract(_target), "Contract not allowed in ChamberGod");
         require(!isAllowedContract(_target), "Contract already allowed");
 
@@ -327,7 +327,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
      *
      * @param _target The address of the allowedContract to remove
      */
-    function removeAllowedContract(address _target) external onlyManager {
+    function removeAllowedContract(address _target) external onlyManager nonReentrant {
         require(isAllowedContract(_target), "Contract not allowed");
 
         allowedContracts.removeStorage(_target);
@@ -462,7 +462,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
         uint256 _minBuyQuantity,
         bytes memory _data,
         address payable _target
-    ) external onlyWizard returns (uint256 tokenAmountBought) {
+    ) external onlyWizard nonReentrant returns (uint256 tokenAmountBought) {
         require(_target != address(this), "Cannot invoke the Chamber");
         require(isAllowedContract(_target), "Target not allowed");
         uint256 tokenAmountBefore = IERC20(_buyToken).balanceOf(address(this));
