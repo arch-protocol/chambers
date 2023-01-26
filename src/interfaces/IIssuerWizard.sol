@@ -45,7 +45,12 @@ interface IIssuerWizard {
                                 FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-    function getConstituentsQuantitiesForIssuance(IChamber chamber, uint256 quantity)
+    function getConstituentsQuantitiesForIssuance(IChamber chamber, uint256 mintQuantity)
+        external
+        view
+        returns (address[] memory, uint256[] memory);
+
+    function getConstituentsQuantitiesForRedeem(IChamber chamber, uint256 redeemQuantity)
         external
         view
         returns (address[] memory, uint256[] memory);
