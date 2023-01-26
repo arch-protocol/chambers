@@ -127,37 +127,6 @@ contract IssuerWizardIntegrationRedeemTest is Test {
     }
 
     /**
-     * [REVERT] Cannor redeem tokens without receiving at least 1 wei of every constituents,
-     * when all constituents have zero as quantity. This scenario should not occur thanks
-     * to validations in other contracts.
-     */
-    function testCannotRedeemTokensWithZeroQuantityInContituents(uint256 quantityToRedeem)
-        public
-    {
-        vm.assume(quantityToRedeem > 0);
-        uint256[] memory testQuantities = new uint256[](2);
-        testQuantities[0] = 0;
-        testQuantities[1] = 0;
-
-        Chamber chamber =
-            chamberFactory.getChamberWithCustomTokens(globalConstituents, testQuantities);
-        vm.prank(alice);
-        issuerWizard.issue(IChamber(address(chamber)), quantityToRedeem);
-        assertEq(IERC20(address(chamber)).totalSupply(), quantityToRedeem);
-
-        vm.expectCall(address(chamber), abi.encodeCall(chamber.burn, (alice, quantityToRedeem)));
-        vm.expectCall(address(chamber), abi.encodeCall(chamber.getConstituentsAddresses, ()));
-
-        // Cannot redeem when trying to extract less than 1 wei of a constituent from the chamber (zero in this case)
-        vm.prank(alice);
-        vm.expectRevert(bytes("Redeem amount too low"));
-        issuerWizard.redeem(IChamber(address(chamber)), quantityToRedeem);
-
-        assertEq(IERC20(address(chamber)).totalSupply(), quantityToRedeem);
-        assertEq(IERC20(address(chamber)).balanceOf(alice), quantityToRedeem);
-    }
-
-    /**
      * [REVERT] Should revert because the amount of redemption is not enough to get at least 1 wei of
      * some constituent out of the chamber
      */
@@ -183,8 +152,11 @@ contract IssuerWizardIntegrationRedeemTest is Test {
         assertEq(IERC20(token1).balanceOf(address(alice)), requiredToken1Collateral);
         assertEq(IERC20(token2).balanceOf(address(alice)), requiredToken2Collateral);
 
-        Chamber chamber =
-            chamberFactory.getChamberWithCustomTokens(globalConstituents, testQuantities);
+        Chamber chamber = Chamber(
+            chamberGod.createChamber(
+                "name", "symbol", globalConstituents, testQuantities, wizards, managers
+            )
+        );
         vm.prank(alice);
         ERC20(token1).approve(issuerAddress, requiredToken1Collateral);
         vm.prank(alice);
@@ -236,8 +208,11 @@ contract IssuerWizardIntegrationRedeemTest is Test {
         deal(usdc, alice, requiredUsdcCollateral);
         assertEq(IERC20(usdc).balanceOf(address(alice)), requiredUsdcCollateral);
 
-        Chamber chamber =
-            chamberFactory.getChamberWithCustomTokens(usdcAsConstituent, usdcQuantity);
+        Chamber chamber = Chamber(
+            chamberGod.createChamber(
+                "name", "symbol", usdcAsConstituent, usdcQuantity, wizards, managers
+            )
+        );
         vm.prank(alice);
         ERC20(usdc).approve(issuerAddress, requiredUsdcCollateral);
 
@@ -261,38 +236,6 @@ contract IssuerWizardIntegrationRedeemTest is Test {
     /*//////////////////////////////////////////////////////////////
                               SUCCESS
     //////////////////////////////////////////////////////////////*/
-
-    /**
-     * [SUCESS] Should burn an *infinite* amount of tokens without receiving any constituents,
-     * when the constituents list in the chamber is empty. This scenario should not occur thanks
-     * to validations in other contracts.
-     */
-    function testRedeemBurnInfiniteTokensWithEmptyContituents(uint256 quantityToRedeem) public {
-        vm.assume(quantityToRedeem > 0);
-        address[] memory testConstituents = new address[](0);
-        uint256[] memory testQuantities = new uint256[](0);
-
-        Chamber chamber =
-            chamberFactory.getChamberWithCustomTokens(testConstituents, testQuantities);
-        vm.prank(alice);
-        issuerWizard.issue(IChamber(address(chamber)), quantityToRedeem);
-        uint256 previousChamberSupply = chamber.totalSupply();
-
-        vm.expectCall(address(chamber), abi.encodeCall(chamber.burn, (alice, quantityToRedeem)));
-        vm.expectCall(address(chamber), abi.encodeCall(chamber.getConstituentsAddresses, ()));
-        vm.expectEmit(true, true, false, true, address(chamber));
-        emit Transfer(alice, address(0x0), quantityToRedeem);
-        vm.expectEmit(true, true, false, true, address(issuerWizard));
-        emit ChamberTokenRedeemed(address(chamber), alice, quantityToRedeem);
-        vm.prank(alice);
-        issuerWizard.redeem(IChamber(address(chamber)), quantityToRedeem);
-
-        uint256 currentChamberSupply = IERC20(address(chamber)).totalSupply();
-        uint256 currentAliceBalance = IERC20(address(chamber)).balanceOf(alice);
-
-        assertEq(currentChamberSupply, previousChamberSupply - quantityToRedeem);
-        assertEq(currentAliceBalance, 0);
-    }
 
     /**
      * [SUCCESS] Should return the constituents to the msg.sender when the redeem() function
@@ -383,8 +326,11 @@ contract IssuerWizardIntegrationRedeemTest is Test {
         deal(usdc, alice, requiredUsdcCollateral);
         assertEq(IERC20(usdc).balanceOf(address(alice)), requiredUsdcCollateral);
 
-        Chamber chamber =
-            chamberFactory.getChamberWithCustomTokens(usdcAsConstituent, usdcQuantity);
+        Chamber chamber = Chamber(
+            chamberGod.createChamber(
+                "name", "symbol", usdcAsConstituent, usdcQuantity, wizards, managers
+            )
+        );
         vm.prank(alice);
         ERC20(usdc).approve(issuerAddress, requiredUsdcCollateral);
 
