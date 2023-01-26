@@ -386,7 +386,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
      * that were not created by arch-protocol
      */
     function unlockChamber() external onlyWizard nonReentrant {
-        require(chamberLocked == 2, "Chamber unlocked");
+        require(chamberLocked == 2, "Chamber already unlocked");
         chamberLocked = 1;
     }
 
