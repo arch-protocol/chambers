@@ -185,6 +185,13 @@ contract IssuerWizardUnitRedeemTest is Test {
         vm.assume(quantityToRedeem > 0);
 
         vm.mockCall(
+            chamberGodAddress,
+            abi.encodeWithSelector(
+                IChamberGod(chamberGodAddress).isChamber.selector, address(chamber)
+            ),
+            abi.encode(true)
+        );
+        vm.mockCall(
             chamberAddress,
             abi.encodeWithSelector(IERC20(address(chamber)).totalSupply.selector),
             abi.encode(quantityToRedeem)
