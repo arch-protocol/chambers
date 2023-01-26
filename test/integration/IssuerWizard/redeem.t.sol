@@ -27,7 +27,7 @@ contract IssuerWizardIntegrationRedeemTest is Test {
     address public chamberGodAddress = address(chamberGod);
     address public token1 = 0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39; // HEX on ETH
     address public token2 = 0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e; // YFI on ETH
-    address public usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;   // USDC on ETH
+    address public usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48; // USDC on ETH
     address[] public globalConstituents = new address[](2);
     uint256[] public globalQuantities = new uint256[](2);
     address[] public wizards = new address[](1);
@@ -295,10 +295,24 @@ contract IssuerWizardIntegrationRedeemTest is Test {
         issuerWizard.redeem(IChamber(address(chamber)), quantityToRedeem);
 
         assertEq(chamber.totalSupply(), 0);
-        assertGe(IERC20(token1).balanceOf(address(chamber)), quantityToRedeem.preciseMulCeil(token1Quantity, 18) - quantityToRedeem.preciseMul(token1Quantity, 18));
-        assertGe(IERC20(token2).balanceOf(address(chamber)), quantityToRedeem.preciseMulCeil(token2Quantity, 18) - quantityToRedeem.preciseMul(token2Quantity, 18));
-        assertGe(IERC20(token1).balanceOf(address(alice)), quantityToRedeem.preciseMul(token1Quantity, 18));
-        assertGe(IERC20(token2).balanceOf(address(alice)), quantityToRedeem.preciseMul(token2Quantity, 18));
+        assertGe(
+            IERC20(token1).balanceOf(address(chamber)),
+            quantityToRedeem.preciseMulCeil(token1Quantity, 18)
+                - quantityToRedeem.preciseMul(token1Quantity, 18)
+        );
+        assertGe(
+            IERC20(token2).balanceOf(address(chamber)),
+            quantityToRedeem.preciseMulCeil(token2Quantity, 18)
+                - quantityToRedeem.preciseMul(token2Quantity, 18)
+        );
+        assertGe(
+            IERC20(token1).balanceOf(address(alice)),
+            quantityToRedeem.preciseMul(token1Quantity, 18)
+        );
+        assertGe(
+            IERC20(token2).balanceOf(address(alice)),
+            quantityToRedeem.preciseMul(token2Quantity, 18)
+        );
     }
 
     /**
@@ -347,7 +361,12 @@ contract IssuerWizardIntegrationRedeemTest is Test {
         issuerWizard.redeem(IChamber(address(chamber)), quantityToRedeem);
 
         assertEq(chamber.totalSupply(), quantityToMint - quantityToRedeem);
-        assertEq(IERC20(usdc).balanceOf(address(chamber)), requiredUsdcCollateral - quantityToRedeem.preciseMul(requiredUsdc, 18));
-        assertEq(IERC20(usdc).balanceOf(address(alice)), quantityToRedeem.preciseMul(requiredUsdc, 18));
+        assertEq(
+            IERC20(usdc).balanceOf(address(chamber)),
+            requiredUsdcCollateral - quantityToRedeem.preciseMul(requiredUsdc, 18)
+        );
+        assertEq(
+            IERC20(usdc).balanceOf(address(alice)), quantityToRedeem.preciseMul(requiredUsdc, 18)
+        );
     }
 }

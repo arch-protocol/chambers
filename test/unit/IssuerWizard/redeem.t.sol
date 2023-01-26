@@ -179,9 +179,9 @@ contract IssuerWizardUnitRedeemTest is Test {
      * when all constituents have zero as quantity. This scenario should not occur thanks
      * to validations in other contracts.
      */
-    function testCannotRedeemBurnInfiniteTokensWithZeroQuantityInContituents(uint256 quantityToRedeem)
-        public
-    {
+    function testCannotRedeemBurnInfiniteTokensWithZeroQuantityInContituents(
+        uint256 quantityToRedeem
+    ) public {
         vm.assume(quantityToRedeem > 0);
 
         vm.mockCall(
@@ -430,7 +430,13 @@ contract IssuerWizardUnitRedeemTest is Test {
         assertEq(IERC20(address(chamber)).totalSupply(), 0);
         assertEq(IERC20(token1).balanceOf(alice), quantityToRedeem.preciseMul(token1Quantity, 18));
         assertEq(IERC20(token2).balanceOf(alice), quantityToRedeem.preciseMul(token2Quantity, 18));
-        assertEq(IERC20(token1).balanceOf(chamberAddress), requiredToken1Collateral - quantityToRedeem.preciseMul(token1Quantity, 18));
-        assertEq(IERC20(token2).balanceOf(chamberAddress), requiredToken2Collateral - quantityToRedeem.preciseMul(token2Quantity, 18));
+        assertEq(
+            IERC20(token1).balanceOf(chamberAddress),
+            requiredToken1Collateral - quantityToRedeem.preciseMul(token1Quantity, 18)
+        );
+        assertEq(
+            IERC20(token2).balanceOf(chamberAddress),
+            requiredToken2Collateral - quantityToRedeem.preciseMul(token2Quantity, 18)
+        );
     }
 }

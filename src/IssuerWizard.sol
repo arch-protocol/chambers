@@ -88,7 +88,7 @@ contract IssuerWizard is IIssuerWizard, ReentrancyGuard {
         }
         return (_constituents, _requiredConstituentsQuantities);
     }
-    
+
     /**
      * Returns the amount of tokens returned for redeem
      *
