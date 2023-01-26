@@ -6,6 +6,23 @@ import "forge-std/Test.sol";
 
 contract ChamberTestUtils is Test {
     /*//////////////////////////////////////////////////////////////
+                              STRUCTS
+    //////////////////////////////////////////////////////////////*/
+
+    struct CompleteQuoteParams {
+        address _sellToken;
+        uint256 _sellAmount;
+        address _buyToken;
+    }
+
+    struct CompleteQuoteResponse {
+        bytes _quotes;
+        uint256 _buyAmount;
+        address _target;
+        address _allowanceTarget;
+    }
+
+    /*//////////////////////////////////////////////////////////////
                               INTERNAL
     //////////////////////////////////////////////////////////////*/
 
@@ -81,19 +98,19 @@ contract ChamberTestUtils is Test {
         return (quotesResponse[0], buyAmountResponse);
     }
 
-    function getCompleteQuoteData(address _sellToken, uint256 _sellAmount, address _buyToken)
+    function getCompleteQuoteData(CompleteQuoteParams memory _params)
         internal
-        returns (bytes memory, uint256, address)
+        returns (CompleteQuoteResponse memory)
     {
         string[] memory inputs = new string[](5);
         inputs[0] = "node";
         inputs[1] = "scripts/fetch-full-0x-quote.js";
-        inputs[2] = bytesToHex(abi.encode(_sellAmount));
-        inputs[3] = bytesToHex(abi.encode(address(_sellToken)));
-        inputs[4] = bytesToHex(abi.encode(_buyToken));
+        inputs[2] = bytesToHex(abi.encode(_params._sellAmount));
+        inputs[3] = bytesToHex(abi.encode(_params._sellToken));
+        inputs[4] = bytesToHex(abi.encode(_params._buyToken));
         bytes memory response = vm.ffi(inputs);
-        (bytes memory quotesResponse, uint256 sellAmountResponse, address target) =
-            abi.decode(response, (bytes, uint256, address));
-        return (quotesResponse, sellAmountResponse, target);
+        (bytes memory quotesResponse, uint256 buyAmount, address target, address allowanceTarget) =
+            abi.decode(response, (bytes, uint256, address, address));
+        return CompleteQuoteResponse(quotesResponse, buyAmount, target, allowanceTarget);
     }
 }

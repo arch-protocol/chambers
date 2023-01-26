@@ -100,7 +100,7 @@ contract ChamberIntegrationExecuteTradeTest is ChamberTestUtils {
 
         vm.prank(wizard);
         vm.expectRevert();
-        chamber.executeTrade(token1, 0, token2, 0, quote, zeroExProxy);
+        chamber.executeTrade(token1, 0, token2, 0, quote, zeroExProxy, zeroExProxy);
 
         assertEq(IERC20(token2).balanceOf(globalChamberAddress), 0);
     }
@@ -115,35 +115,12 @@ contract ChamberIntegrationExecuteTradeTest is ChamberTestUtils {
 
         vm.expectRevert();
         vm.prank(wizard);
-        chamber.executeTrade(token1, 100 ether, token2, 0, quote, zeroExProxy);
+        chamber.executeTrade(token1, 100 ether, token2, 0, quote, zeroExProxy, zeroExProxy);
     }
 
     /*//////////////////////////////////////////////////////////////
                               SUCCESS
     //////////////////////////////////////////////////////////////*/
-
-    /**
-     * [SUCCESS] Should call with correct quotes and swap successfully with 1% slippage.
-     */
-    function testSuccessSwap(uint256 buyAmount) public {
-        vm.assume(buyAmount > 1 ether);
-        vm.assume(buyAmount < 1000 ether);
-
-        (bytes memory quote, uint256 sellAmount) = getQuoteDataForMint(buyAmount, token2, token1);
-
-        uint256 amountWithSlippage = (sellAmount * 101 / 100);
-        deal(token1, globalChamberAddress, amountWithSlippage);
-
-        vm.prank(wizard);
-        chamber.executeTrade(token1, amountWithSlippage, token2, buyAmount, quote, zeroExProxy);
-
-        uint256 inputTokenBalanceAfter = IERC20(token1).balanceOf(globalChamberAddress);
-
-        assertGe(sellAmount * 1 / 100, inputTokenBalanceAfter);
-        assertApproxEqAbs(
-            buyAmount, IERC20(token2).balanceOf(globalChamberAddress), buyAmount * 5 / 1000
-        );
-    }
 
     /**
      * [SUCCESS] Should call with correct quotes and swap successfully with 1% slippage.
@@ -158,7 +135,9 @@ contract ChamberIntegrationExecuteTradeTest is ChamberTestUtils {
         deal(token1, globalChamberAddress, amountWithSlippage);
 
         vm.prank(wizard);
-        chamber.executeTrade(token1, amountWithSlippage, token2, buyAmount, quote, zeroExProxy);
+        chamber.executeTrade(
+            token1, amountWithSlippage, token2, buyAmount, quote, zeroExProxy, zeroExProxy
+        );
 
         uint256 inputTokenBalanceAfter = IERC20(token1).balanceOf(globalChamberAddress);
 
@@ -166,6 +145,7 @@ contract ChamberIntegrationExecuteTradeTest is ChamberTestUtils {
         assertApproxEqAbs(
             buyAmount, IERC20(token2).balanceOf(globalChamberAddress), buyAmount * 5 / 1000
         );
+        assertEq(IERC20(token1).allowance(globalChamberAddress, zeroExProxy), 0);
     }
 
     /**
@@ -187,10 +167,11 @@ contract ChamberIntegrationExecuteTradeTest is ChamberTestUtils {
 
         vm.prank(wizard);
         chamber.executeTrade(
-            token1, depositAmount, yvUSDC, yvUSDCQty * 995 / 1000, data, payable(yvUSDC)
+            token1, depositAmount, yvUSDC, yvUSDCQty * 995 / 1000, data, payable(yvUSDC), yvUSDC
         );
         uint256 currentYvUSDCQty = IERC20(yvUSDC).balanceOf(globalChamberAddress);
         assertApproxEqAbs(currentYvUSDCQty, yvUSDCQty, (yvUSDCQty) / 10000);
+        assertEq(IERC20(token1).allowance(globalChamberAddress, yvUSDC), 0);
     }
 
     /**
@@ -212,9 +193,12 @@ contract ChamberIntegrationExecuteTradeTest is ChamberTestUtils {
         data = abi.encodeWithSignature("withdraw(uint256)", sharesToSell);
 
         vm.prank(wizard);
-        chamber.executeTrade(yvUSDC, sharesToSell, token1, expectedUSDC, data, payable(yvUSDC));
+        chamber.executeTrade(
+            yvUSDC, sharesToSell, token1, expectedUSDC, data, payable(yvUSDC), yvUSDC
+        );
 
         uint256 currentUSDCQty = IERC20(token1).balanceOf(globalChamberAddress);
         assertApproxEqAbs(currentUSDCQty, expectedUSDC, (expectedUSDC) / 10000);
+        assertEq(IERC20(yvUSDC).allowance(globalChamberAddress, yvUSDC), 0);
     }
 }

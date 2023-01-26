@@ -452,6 +452,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
      * @param _minBuyQuantity     The minimum amount of buyToken that should be bought
      * @param _data               The data to be passed to the contract
      * @param _target            The address of the contract to call
+     * @param _allowanceTarget    The address of the contract to give allowance of tokens
      *
      * @return tokenAmountBought  The amount of buyToken bought
      */
@@ -461,23 +462,28 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
         address _buyToken,
         uint256 _minBuyQuantity,
         bytes memory _data,
-        address payable _target
+        address payable _target,
+        address _allowanceTarget
     ) external onlyWizard nonReentrant returns (uint256 tokenAmountBought) {
         require(_target != address(this), "Cannot invoke the Chamber");
         require(isAllowedContract(_target), "Target not allowed");
         uint256 tokenAmountBefore = IERC20(_buyToken).balanceOf(address(this));
-        uint256 currentAllowance = IERC20(_sellToken).allowance(address(this), _target);
+        uint256 currentAllowance = IERC20(_sellToken).allowance(address(this), _allowanceTarget);
 
         if (currentAllowance < _sellQuantity) {
             IERC20(_sellToken).safeIncreaseAllowance(
-                _target, ((_sellQuantity * 105 / 100) - currentAllowance)
+                _allowanceTarget, (_sellQuantity - currentAllowance)
             );
         }
         _invokeContract(_data, _target);
 
+        currentAllowance = IERC20(_sellToken).allowance(address(this), _allowanceTarget);
+        IERC20(_sellToken).safeDecreaseAllowance(_allowanceTarget, currentAllowance);
+
         uint256 tokenAmountAfter = IERC20(_buyToken).balanceOf(address(this));
         tokenAmountBought = tokenAmountAfter - tokenAmountBefore;
         require(tokenAmountBought >= _minBuyQuantity, "Underbought buy quantity");
+
         return tokenAmountBought;
     }
 
