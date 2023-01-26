@@ -5,6 +5,7 @@ pragma solidity ^0.8.17.0;
 import "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IChamber} from "src/interfaces/IChamber.sol";
+import {IChamberGod} from "src/interfaces/IChamberGod.sol";
 import {Chamber} from "src/Chamber.sol";
 import {IssuerWizard} from "src/IssuerWizard.sol";
 import {ChamberFactory} from "test/utils/factories.sol";
@@ -53,7 +54,7 @@ contract ChamberIntegrationUpdateQuantitiesTest is Test {
         globalQuantities[0] = 6 ether;
         globalQuantities[1] = 2 ether;
 
-        issuerWizard = new IssuerWizard();
+        issuerWizard = new IssuerWizard(chamberGodAddress);
         issuerAddress = address(issuerWizard);
 
         evilSaruman = new EvilSaruman();
@@ -181,6 +182,15 @@ contract ChamberIntegrationUpdateQuantitiesTest is Test {
         vm.expectEmit(true, true, true, true, issuerAddress);
         emit ChamberTokenIssued(address(chamber), aliceTheSorcerer, initialSupply);
 
+        // Mock Call to simulate that the Chamber Has been Created by ChamberGod
+        vm.mockCall(
+            chamberGodAddress,
+            abi.encodeWithSelector(
+                IChamberGod(chamberGodAddress).isChamber.selector, address(chamber)
+            ),
+            abi.encode(true)
+        );
+
         vm.prank(aliceTheSorcerer);
         issuerWizard.issue(IChamber(address(chamber)), initialSupply);
 
@@ -250,6 +260,15 @@ contract ChamberIntegrationUpdateQuantitiesTest is Test {
 
         vm.expectEmit(true, true, true, true, issuerAddress);
         emit ChamberTokenIssued(address(chamber), aliceTheSorcerer, initialSupply);
+
+        // Mock Call to simulate that the Chamber Has been Created by ChamberGod
+        vm.mockCall(
+            chamberGodAddress,
+            abi.encodeWithSelector(
+                IChamberGod(chamberGodAddress).isChamber.selector, address(chamber)
+            ),
+            abi.encode(true)
+        );
 
         vm.prank(aliceTheSorcerer);
         issuerWizard.issue(IChamber(address(chamber)), initialSupply);
@@ -327,6 +346,15 @@ contract ChamberIntegrationUpdateQuantitiesTest is Test {
         vm.expectEmit(true, true, true, true, issuerAddress);
         emit ChamberTokenIssued(address(chamber), aliceTheSorcerer, initialSupply);
 
+        // Mock Call to simulate that the Chamber Has been Created by ChamberGod
+        vm.mockCall(
+            chamberGodAddress,
+            abi.encodeWithSelector(
+                IChamberGod(chamberGodAddress).isChamber.selector, address(chamber)
+            ),
+            abi.encode(true)
+        );
+
         vm.prank(aliceTheSorcerer);
         issuerWizard.issue(IChamber(address(chamber)), initialSupply);
 
@@ -393,6 +421,15 @@ contract ChamberIntegrationUpdateQuantitiesTest is Test {
 
         vm.expectEmit(true, true, true, true, issuerAddress);
         emit ChamberTokenIssued(address(chamber), aliceTheSorcerer, initialSupply);
+
+        // Mock Call to simulate that the Chamber Has been Created by ChamberGod
+        vm.mockCall(
+            chamberGodAddress,
+            abi.encodeWithSelector(
+                IChamberGod(chamberGodAddress).isChamber.selector, address(chamber)
+            ),
+            abi.encode(true)
+        );
 
         vm.prank(aliceTheSorcerer);
         issuerWizard.issue(IChamber(address(chamber)), initialSupply);

@@ -25,7 +25,7 @@ contract RebalanceWizardIntegrationRebalanceTest is ChamberTestUtils {
                               VARIABLES
     //////////////////////////////////////////////////////////////*/
 
-    IChamber chamber;
+    IChamber private chamber;
     IssuerWizard private issuer;
     RebalanceWizard private rebalancer;
     ChamberGod private god;
@@ -45,10 +45,6 @@ contract RebalanceWizardIntegrationRebalanceTest is ChamberTestUtils {
     //////////////////////////////////////////////////////////////*/
 
     function setUp() public {
-        issuer = new IssuerWizard();
-        rebalancer = new RebalanceWizard();
-        vm.label(address(issuer), "Issuer");
-        vm.label(address(rebalancer), "Rebalancer");
         constituents = new address[](1);
         quantities = new uint256[](1);
         wizards = new address[](2);
@@ -56,6 +52,10 @@ contract RebalanceWizardIntegrationRebalanceTest is ChamberTestUtils {
         owner = vm.addr(0x2);
         vm.startPrank(owner);
         god = new ChamberGod();
+        issuer = new IssuerWizard(address(god));
+        rebalancer = new RebalanceWizard();
+        vm.label(address(issuer), "Issuer");
+        vm.label(address(rebalancer), "Rebalancer");
         god.addWizard(address(issuer));
         god.addWizard(address(rebalancer));
         wizards[0] = address(issuer);

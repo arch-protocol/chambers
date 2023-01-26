@@ -6,6 +6,7 @@ import "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {IChamber} from "src/interfaces/IChamber.sol";
+import {IChamberGod} from "src/interfaces/IChamberGod.sol";
 import {IssuerWizard} from "src/IssuerWizard.sol";
 import {Chamber} from "src/Chamber.sol";
 import {ChamberFactory} from "test/utils/factories.sol";
@@ -53,7 +54,7 @@ contract StreamingFeeWizardIntegrationInternalCollectStreamingFeeTest is Test {
         globalQuantities[0] = 54;
         globalQuantities[1] = 77;
 
-        issuerWizard = new IssuerWizard();
+        issuerWizard = new IssuerWizard(chamberGodAddress);
         issuerAddress = address(issuerWizard);
 
         streamingFeeWizard = new ExposedStreamingFeeWizard();
@@ -141,6 +142,15 @@ contract StreamingFeeWizardIntegrationInternalCollectStreamingFeeTest is Test {
         IERC20(token1).approve(issuerAddress, initialSupply.preciseMulCeil(globalQuantities[0], 18));
         vm.prank(aliceTheSorcerer);
         IERC20(token2).approve(issuerAddress, initialSupply.preciseMulCeil(globalQuantities[1], 18));
+
+        // Mock Call to simulate that the Chamber Has been Created by ChamberGod
+        vm.mockCall(
+            chamberGodAddress,
+            abi.encodeWithSelector(
+                IChamberGod(chamberGodAddress).isChamber.selector, address(someChamber)
+            ),
+            abi.encode(true)
+        );
 
         vm.prank(aliceTheSorcerer);
         issuerWizard.issue(IChamber(address(someChamber)), initialSupply);
@@ -230,6 +240,15 @@ contract StreamingFeeWizardIntegrationInternalCollectStreamingFeeTest is Test {
         vm.prank(aliceTheSorcerer);
         IERC20(token2).approve(issuerAddress, initialSupply.preciseMulCeil(globalQuantities[1], 18));
 
+        // Mock Call to simulate that the Chamber Has been Created by ChamberGod
+        vm.mockCall(
+            chamberGodAddress,
+            abi.encodeWithSelector(
+                IChamberGod(chamberGodAddress).isChamber.selector, address(chamberAddress)
+            ),
+            abi.encode(true)
+        );
+
         vm.prank(aliceTheSorcerer);
         issuerWizard.issue(IChamber(chamberAddress), initialSupply);
 
@@ -304,6 +323,15 @@ contract StreamingFeeWizardIntegrationInternalCollectStreamingFeeTest is Test {
         IERC20(token1).approve(issuerAddress, initialSupply.preciseMulCeil(globalQuantities[0], 18));
         vm.prank(aliceTheSorcerer);
         IERC20(token2).approve(issuerAddress, initialSupply.preciseMulCeil(globalQuantities[1], 18));
+
+        // Mock Call to simulate that the Chamber Has been Created by ChamberGod
+        vm.mockCall(
+            chamberGodAddress,
+            abi.encodeWithSelector(
+                IChamberGod(chamberGodAddress).isChamber.selector, address(chamberAddress)
+            ),
+            abi.encode(true)
+        );
 
         vm.prank(aliceTheSorcerer);
         issuerWizard.issue(IChamber(chamberAddress), initialSupply);
