@@ -77,7 +77,7 @@ contract IssuerWizardIntegrationIssueTest is Test {
     function testCannotIssueChamberNotCreatedByGod() public {
         address fakeChamber = vm.addr(0x123456);
         uint256 previousChamberSupply = IERC20(address(globalChamber)).totalSupply();
-        vm.expectRevert(bytes("Target chamber not valid"));
+        vm.expectRevert(bytes("Chamber invalid"));
 
         issuerWizard.issue(IChamber(address(fakeChamber)), 0);
 

@@ -10,6 +10,10 @@ import {StreamingFeeWizard, IStreamingFeeWizard} from "src/StreamingFeeWizard.so
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {console} from "forge-std/console.sol";
 
+/**
+ * Fake chamber that was not created by ChamberGod contract.
+ * It will be used to perform a phishing attack attempt.
+ */
 contract FakeChamber {
     function mint(address, uint256) external {
         return;
@@ -34,8 +38,6 @@ contract FakeChamber {
 }
 
 contract ChambersTest is Test {
-    uint256 public constant FORK_BLOCK_NUMBER = 16_421_844;
-
     ERC20 public constant USDC = ERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
 
     ChamberGod public god;
@@ -50,8 +52,6 @@ contract ChambersTest is Test {
     address public alice;
 
     function setUp() public {
-        //vm.createSelectFork(vm.rpcUrl("mainnet"), FORK_BLOCK_NUMBER);
-
         owner = makeAddr("OWNER");
         manager = makeAddr("MANAGER");
         bob = makeAddr("BOB");
@@ -100,64 +100,14 @@ contract ChambersTest is Test {
         deal(address(USDC), alice, 1000000e6);
     }
 
-    function testCollectMultiple() public {
-        vm.startPrank(alice);
+    /*//////////////////////////////////////////////////////////////
+                              REVERT
+    //////////////////////////////////////////////////////////////*/
 
-        USDC.approve(address(issuer), type(uint256).max);
-        issuer.issue(chamber, 1e18);
-
-        vm.stopPrank();
-
-        vm.startPrank(bob);
-
-        USDC.approve(address(issuer), type(uint256).max);
-        issuer.issue(chamber, 1e18);
-
-        vm.stopPrank();
-
-        console.log("Initial total supply", chamber.totalSupply());
-
-        for (uint256 i; i < 365; ++i) {
-            vm.warp(block.timestamp + 1 days);
-            fees.collectStreamingFee(chamber);
-        }
-
-        vm.warp(block.timestamp + 0.25 days);
-        fees.collectStreamingFee(chamber);
-
-        console.log("total supply", chamber.totalSupply());
-        console.log("time", block.timestamp);
-        console.log("fees received", chamber.balanceOf(owner));
-        console.log("chamber quantity", chamber.getConstituentQuantity(address(USDC)));
-    }
-
-    function testCollectOnce() public {
-        vm.startPrank(alice);
-
-        USDC.approve(address(issuer), type(uint256).max);
-        issuer.issue(chamber, 1e18);
-
-        vm.stopPrank();
-
-        vm.startPrank(bob);
-
-        USDC.approve(address(issuer), type(uint256).max);
-        issuer.issue(chamber, 1e18);
-
-        vm.stopPrank();
-
-        console.log("Initial total supply", chamber.totalSupply());
-
-        vm.warp(block.timestamp + 365.25 days);
-        fees.collectStreamingFee(chamber);
-
-        console.log("total supply", chamber.totalSupply());
-        console.log("time", block.timestamp);
-        console.log("fees received", chamber.balanceOf(owner));
-        console.log("chamber quantity", chamber.getConstituentQuantity(address(USDC)));
-    }
-
-    function testIssueToFakeChamber() public {
+    /**
+     * [REVERT] Cannot issue a Chamber token that has not been created by the ChamberGod
+     */
+    function testCannotIssueFakeChamber() public {
         FakeChamber fakeChamber = new FakeChamber();
 
         //[ARCH] save Bob's USDC balance to check after the phishing attempt.
@@ -173,7 +123,7 @@ contract ChambersTest is Test {
         // chamber
 
         //[ARCH] Should revert now because fakeChamber was not created by ChamberGod
-        vm.expectRevert("Target chamber not valid");
+        vm.expectRevert("Chamber invalid");
         issuer.issue(Chamber(address(fakeChamber)), 1e6);
 
         vm.stopPrank();

@@ -91,6 +91,10 @@ interface IChamber {
 
     function updateQuantities() external;
 
+    function lockChamber() external;
+
+    function unlockChamber() external;
+
     function addAllowedContract(address target) external;
 
     function removeAllowedContract(address target) external;

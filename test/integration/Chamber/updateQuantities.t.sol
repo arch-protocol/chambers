@@ -182,7 +182,7 @@ contract ChamberIntegrationUpdateQuantitiesTest is Test {
         vm.expectEmit(true, true, true, true, issuerAddress);
         emit ChamberTokenIssued(address(chamber), aliceTheSorcerer, initialSupply);
 
-        // Mock Call to simulate that the Chamber Has been Created by ChamberGod
+        // Mock Call to simulate that the Chamber has been created by ChamberGod
         vm.mockCall(
             chamberGodAddress,
             abi.encodeWithSelector(
@@ -261,7 +261,7 @@ contract ChamberIntegrationUpdateQuantitiesTest is Test {
         vm.expectEmit(true, true, true, true, issuerAddress);
         emit ChamberTokenIssued(address(chamber), aliceTheSorcerer, initialSupply);
 
-        // Mock Call to simulate that the Chamber Has been Created by ChamberGod
+        // Mock Call to simulate that the Chamber has been created by ChamberGod
         vm.mockCall(
             chamberGodAddress,
             abi.encodeWithSelector(
@@ -346,7 +346,7 @@ contract ChamberIntegrationUpdateQuantitiesTest is Test {
         vm.expectEmit(true, true, true, true, issuerAddress);
         emit ChamberTokenIssued(address(chamber), aliceTheSorcerer, initialSupply);
 
-        // Mock Call to simulate that the Chamber Has been Created by ChamberGod
+        // Mock Call to simulate that the Chamber has been created by ChamberGod
         vm.mockCall(
             chamberGodAddress,
             abi.encodeWithSelector(
@@ -422,7 +422,7 @@ contract ChamberIntegrationUpdateQuantitiesTest is Test {
         vm.expectEmit(true, true, true, true, issuerAddress);
         emit ChamberTokenIssued(address(chamber), aliceTheSorcerer, initialSupply);
 
-        // Mock Call to simulate that the Chamber Has been Created by ChamberGod
+        // Mock Call to simulate that the Chamber has been created by ChamberGod
         vm.mockCall(
             chamberGodAddress,
             abi.encodeWithSelector(

@@ -97,9 +97,10 @@ contract IssuerWizard is IIssuerWizard, ReentrancyGuard {
      * @param _quantity Amount of Chamber tokens to be minted
      */
     function issue(IChamber _chamber, uint256 _quantity) external nonReentrant {
-        require(chamberGod.isChamber(address(_chamber)), "Target chamber not valid");
+        require(chamberGod.isChamber(address(_chamber)), "Chamber invalid");
         require(_quantity > 0, "Quantity must be greater than 0");
-
+        _chamber.lockChamber();
+        _chamber.mint(msg.sender, _quantity);
         (address[] memory _constituents, uint256[] memory _requiredConstituentsQuantities) =
             getConstituentsQuantitiesForIssuance(_chamber, _quantity);
 
@@ -109,8 +110,7 @@ contract IssuerWizard is IIssuerWizard, ReentrancyGuard {
                 msg.sender, address(_chamber), _requiredConstituentsQuantities[i]
             );
         }
-        _chamber.mint(msg.sender, _quantity);
-
+        _chamber.unlockChamber();
         emit ChamberTokenIssued(address(_chamber), msg.sender, _quantity);
     }
 
@@ -122,8 +122,9 @@ contract IssuerWizard is IIssuerWizard, ReentrancyGuard {
      * @param _quantity Amount of Chamber tokens to be burned
      */
     function redeem(IChamber _chamber, uint256 _quantity) external nonReentrant {
-        require(chamberGod.isChamber(address(_chamber)), "Target chamber not valid");
+        require(chamberGod.isChamber(address(_chamber)), "Chamber invalid");
         require(_quantity > 0, "Quantity must be greater than 0");
+        _chamber.lockChamber();
         uint256 currentBalance = IERC20(address(_chamber)).balanceOf(msg.sender);
         require(currentBalance >= _quantity, "Not enough balance to redeem");
 
@@ -136,7 +137,7 @@ contract IssuerWizard is IIssuerWizard, ReentrancyGuard {
             address constituent = _constituents[i];
             _chamber.withdrawTo(constituent, msg.sender, _requiredConstituentsQuantities[i]);
         }
-
+        _chamber.unlockChamber();
         emit ChamberTokenRedeemed(address(_chamber), msg.sender, _quantity);
     }
 }
