@@ -70,14 +70,13 @@ contract IssuerWizardUnitRedeemTest is Test {
             ),
             abi.encode(false)
         );
-        vm.expectRevert(bytes("Target chamber not valid"));
+        vm.expectRevert(bytes("Chamber invalid"));
         issuerWizard.redeem(IChamber(chamberAddress), 0);
     }
 
     /**
      * [REVERT] Calling redeem() should revert if quantity to redeem is zero
      */
-
     function testCannotRedeemQuantityZero() public {
         vm.mockCall(
             chamberAddress,

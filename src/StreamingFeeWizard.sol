@@ -62,7 +62,7 @@ contract StreamingFeeWizard is IStreamingFeeWizard, ReentrancyGuard {
      * @param _chamber  Chamber to enable
      * @param _feeState     First feeState of the Chamber
      */
-    function enableChamber(IChamber _chamber, FeeState memory _feeState) external {
+    function enableChamber(IChamber _chamber, FeeState memory _feeState) external nonReentrant {
         require(IChamber(_chamber).isManager(msg.sender), "msg.sender is not chamber's manager");
         require(_feeState.feeRecipient != address(0), "Recipient cannot be null address");
         require(_feeState.maxStreamingFeePercentage <= 100 * SCALE_UNIT, "Max fee must be <= 100%");
@@ -82,7 +82,7 @@ contract StreamingFeeWizard is IStreamingFeeWizard, ReentrancyGuard {
      *
      * @param _chamber Chamber to acquire streaming fees from
      */
-    function collectStreamingFee(IChamber _chamber) external {
+    function collectStreamingFee(IChamber _chamber) external nonReentrant {
         uint256 previousCollectTimestamp = feeStates[_chamber].lastCollectTimestamp;
         require(previousCollectTimestamp > 0, "Chamber does not exist");
         require(previousCollectTimestamp < block.timestamp, "Cannot collect twice");
@@ -105,7 +105,10 @@ contract StreamingFeeWizard is IStreamingFeeWizard, ReentrancyGuard {
      * @param _chamber          Chamber to update streaming fee percentage
      * @param _newFeePercentage     New streaming fee in percentage [1 % = 10e18]
      */
-    function updateStreamingFee(IChamber _chamber, uint256 _newFeePercentage) external {
+    function updateStreamingFee(IChamber _chamber, uint256 _newFeePercentage)
+        external
+        nonReentrant
+    {
         uint256 previousCollectTimestamp = feeStates[_chamber].lastCollectTimestamp;
         require(previousCollectTimestamp > 0, "Chamber does not exist");
         require(previousCollectTimestamp < block.timestamp, "Cannot update fee after collecting");
@@ -138,7 +141,10 @@ contract StreamingFeeWizard is IStreamingFeeWizard, ReentrancyGuard {
      * @param _chamber          Chamber to update max. streaming fee percentage
      * @param _newMaxFeePercentage  New max. streaming fee in percentage [1 % = 10e18]
      */
-    function updateMaxStreamingFee(IChamber _chamber, uint256 _newMaxFeePercentage) external {
+    function updateMaxStreamingFee(IChamber _chamber, uint256 _newMaxFeePercentage)
+        external
+        nonReentrant
+    {
         require(feeStates[_chamber].lastCollectTimestamp > 0, "Chamber does not exist");
         require(IChamber(_chamber).isManager(msg.sender), "msg.sender is not chamber's manager");
         require(
@@ -162,7 +168,10 @@ contract StreamingFeeWizard is IStreamingFeeWizard, ReentrancyGuard {
      * @param _chamber          Chamber to update streaming fee recipient
      * @param _newFeeRecipient      New fee recipient address
      */
-    function updateFeeRecipient(IChamber _chamber, address _newFeeRecipient) external {
+    function updateFeeRecipient(IChamber _chamber, address _newFeeRecipient)
+        external
+        nonReentrant
+    {
         require(feeStates[_chamber].lastCollectTimestamp > 0, "Chamber does not exist");
         require(IChamber(_chamber).isManager(msg.sender), "msg.sender is not chamber's manager");
         require(_newFeeRecipient != address(0), "Recipient cannot be null address");
@@ -278,7 +287,7 @@ contract StreamingFeeWizard is IStreamingFeeWizard, ReentrancyGuard {
         IChamber _chamber,
         uint256 _lastCollectTimestamp,
         uint256 _streamingFeePercentage
-    ) internal nonReentrant returns (uint256 inflationQuantity) {
+    ) internal returns (uint256 inflationQuantity) {
         // Get chamber supply
         uint256 currentSupply = IERC20(address(_chamber)).totalSupply();
 
