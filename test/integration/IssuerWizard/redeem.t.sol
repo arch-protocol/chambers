@@ -140,7 +140,7 @@ contract IssuerWizardIntegrationRedeemTest is Test {
         vm.assume(token2Quantity > 0);
         vm.assume(token2Quantity < 1 ether);
         vm.assume(quantityToRedeem > 0);
-        vm.assume(quantityToRedeem < 1 ether / token1Quantity);
+        vm.assume(quantityToRedeem < 1 ether / token1Quantity); // Limit of over-legit collateralization
         vm.assume(quantityToRedeem < 1 ether / token2Quantity);
 
         uint256[] memory testQuantities = new uint256[](2);
@@ -184,9 +184,20 @@ contract IssuerWizardIntegrationRedeemTest is Test {
     }
 
     /**
-     * [REVERT] Should revert because the minted amount was performed with FULL overcollateralization. In
-     * other words, all USDC put in the chamber is over-collateral, not legit-collateral. So every redeem
-     * amount will fail, as its not enough to get even 1 wei of USDC out.
+     * [REVERT] All redeems should fail because the minting process was overcollateralized.
+     *
+     * Consider: [1e18 wei] CHAMBER === [1 wei]
+     *
+     * Minting any amount in [1, 1e18[ will require 1 wei of USDC to deposit,
+     * because of preciseMulCeil() that rounds in favor of the protocol.
+     *
+     * Redeeming any amount in [1, 1e18[ will revert because all those amounts
+     * are not enough to extract 1 wei of USDC out of the chamber. We use preciseMul()
+     * here, so if the result is zero, it will revert.
+     *
+     * Generalizing, if the required_USDC is < 1e18 per chamber token (1e18 wei), the
+     * limit in which all redeems fail is: (1e18 / required_USDC). Over that, at least 1 wei
+     * of USDC is claimable.
      */
     function testCannotRedeemUSDCWhenMintWasOvercollateralized(
         uint256 quantityToMint,
@@ -317,8 +328,21 @@ contract IssuerWizardIntegrationRedeemTest is Test {
     }
 
     /**
-     * [SUCCESS] Should be able to redeem some USDC, because some part of the mint was not
-     * overcollateralized, in other words, was legit collateralization, not a bonus.
+     * [SUCCESS] All redeems should success because the minting process was legit collateral,
+     * and might have overcollateralization.
+     *
+     * Consider: [1e18 wei] CHAMBER === [1 wei]
+     *
+     * Minting any amount in [1e18, infinite[ will require at least 1 wei of USDC to deposit.
+     *
+     * Redeeming any amount in [1e18/required_USDC, infinite[ will success because at least 1 wei
+     * of USDC is claimable.
+     *
+     * Generalizing, if the required_USDC is < 1e18 per chamber token (1e18 wei), the
+     * limit in which all redeems success is over: (1e18 / required_USDC).
+     *
+     * As 1e18 required_USDC per chamber token equals 1e12 $USDC, most use cases are satisfied,
+     * even with a token that uses 6 decimals.
      */
     function testRedeemUSDCWithGeneralMintUseCase(
         uint256 quantityToMint,
