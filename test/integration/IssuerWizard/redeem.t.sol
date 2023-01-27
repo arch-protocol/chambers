@@ -27,6 +27,7 @@ contract IssuerWizardIntegrationRedeemTest is Test {
     address public chamberGodAddress = address(chamberGod);
     address public token1 = 0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39; // HEX on ETH
     address public token2 = 0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e; // YFI on ETH
+    address public usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48; // USDC on ETH
     address[] public globalConstituents = new address[](2);
     uint256[] public globalQuantities = new uint256[](2);
     address[] public wizards = new address[](1);
@@ -125,6 +126,125 @@ contract IssuerWizardIntegrationRedeemTest is Test {
         assertEq(currentAliceBalance, previousAliceBalance);
     }
 
+    /**
+     * [REVERT] Should revert because the amount of redemption is not enough to get at least 1 wei of
+     * some constituent out of the chamber
+     */
+    function testCannotRedeemWithTwoConstituentsWhenAmountIsTooLow(
+        uint256 quantityToRedeem,
+        uint256 token1Quantity,
+        uint256 token2Quantity
+    ) public {
+        vm.assume(token1Quantity > 0);
+        vm.assume(token1Quantity < 1 ether);
+        vm.assume(token2Quantity > 0);
+        vm.assume(token2Quantity < 1 ether);
+        vm.assume(quantityToRedeem > 0);
+        vm.assume(quantityToRedeem < 1 ether / token1Quantity); // Limit of over-legit collateralization
+        vm.assume(quantityToRedeem < 1 ether / token2Quantity);
+
+        uint256[] memory testQuantities = new uint256[](2);
+        testQuantities[0] = token1Quantity;
+        testQuantities[1] = token2Quantity;
+        uint256 requiredToken1Collateral = quantityToRedeem.preciseMulCeil(token1Quantity, 18);
+        uint256 requiredToken2Collateral = quantityToRedeem.preciseMulCeil(token2Quantity, 18);
+        deal(token1, alice, requiredToken1Collateral);
+        deal(token2, alice, requiredToken2Collateral);
+        assertEq(IERC20(token1).balanceOf(address(alice)), requiredToken1Collateral);
+        assertEq(IERC20(token2).balanceOf(address(alice)), requiredToken2Collateral);
+
+        Chamber chamber = Chamber(
+            chamberGod.createChamber(
+                "name", "symbol", globalConstituents, testQuantities, wizards, managers
+            )
+        );
+        vm.prank(alice);
+        ERC20(token1).approve(issuerAddress, requiredToken1Collateral);
+        vm.prank(alice);
+        ERC20(token2).approve(issuerAddress, requiredToken2Collateral);
+
+        vm.prank(alice);
+        issuerWizard.issue(IChamber(address(chamber)), quantityToRedeem);
+
+        assertEq(chamber.totalSupply(), quantityToRedeem);
+        assertEq(IERC20(token1).balanceOf(address(alice)), 0);
+        assertEq(IERC20(token2).balanceOf(address(alice)), 0);
+        assertEq(IERC20(token1).balanceOf(address(chamber)), requiredToken1Collateral);
+        assertEq(IERC20(token2).balanceOf(address(chamber)), requiredToken2Collateral);
+
+        vm.prank(alice);
+        vm.expectRevert(bytes("Redeem amount too low"));
+        issuerWizard.redeem(IChamber(address(chamber)), quantityToRedeem);
+
+        assertEq(chamber.totalSupply(), quantityToRedeem);
+        assertGe(IERC20(token1).balanceOf(address(chamber)), requiredToken1Collateral);
+        assertGe(IERC20(token2).balanceOf(address(chamber)), requiredToken2Collateral);
+        assertGe(IERC20(token1).balanceOf(address(alice)), 0);
+        assertGe(IERC20(token2).balanceOf(address(alice)), 0);
+    }
+
+    /**
+     * [REVERT] All redeems should fail because the minting process was overcollateralized.
+     *
+     * Consider: [1e18 wei] CHAMBER === [1 wei]
+     *
+     * Minting any amount in [1, 1e18[ will require 1 wei of USDC to deposit,
+     * because of preciseMulCeil() that rounds in favor of the protocol.
+     *
+     * Redeeming any amount in [1, 1e18[ will revert because all those amounts
+     * are not enough to extract 1 wei of USDC out of the chamber. We use preciseMul()
+     * here, so if the result is zero, it will revert.
+     *
+     * Generalizing, if the required_USDC is < 1e18 per chamber token (1e18 wei), the
+     * limit in which all redeems fail is: (1e18 / required_USDC). Over that, at least 1 wei
+     * of USDC is claimable.
+     */
+    function testCannotRedeemUSDCWhenMintWasOvercollateralized(
+        uint256 quantityToMint,
+        uint256 quantityToRedeem,
+        uint256 requiredUsdc
+    ) public {
+        vm.assume(requiredUsdc > 0);
+        vm.assume(requiredUsdc < 1 ether);
+        vm.assume(quantityToMint > 0);
+        vm.assume(quantityToMint < 1 ether / requiredUsdc); // Limit of full overcollateralization
+        vm.assume(quantityToRedeem > 0);
+        vm.assume(quantityToRedeem < quantityToMint);
+
+        address[] memory usdcAsConstituent = new address[](1);
+        usdcAsConstituent[0] = usdc;
+        uint256[] memory usdcQuantity = new uint256[](1);
+        usdcQuantity[0] = requiredUsdc;
+        uint256 requiredUsdcCollateral = quantityToMint.preciseMulCeil(requiredUsdc, 18);
+
+        deal(usdc, alice, requiredUsdcCollateral);
+        assertEq(IERC20(usdc).balanceOf(address(alice)), requiredUsdcCollateral);
+
+        Chamber chamber = Chamber(
+            chamberGod.createChamber(
+                "name", "symbol", usdcAsConstituent, usdcQuantity, wizards, managers
+            )
+        );
+        vm.prank(alice);
+        ERC20(usdc).approve(issuerAddress, requiredUsdcCollateral);
+
+        // This is a forced mint, as the quantityToMint is less than 1e18, so we enter over-collateralization terriroty
+        vm.prank(alice);
+        issuerWizard.issue(IChamber(address(chamber)), quantityToMint);
+        assertEq(chamber.totalSupply(), quantityToMint);
+        assertEq(IERC20(usdc).balanceOf(address(alice)), 0);
+        assertEq(IERC20(usdc).balanceOf(address(chamber)), requiredUsdcCollateral);
+
+        // Every attempt to redeem should fail, because the mint was overcollaterized, so the redeemAmount is not enough to get even 1 wei of USDC out
+        vm.prank(alice);
+        vm.expectRevert(bytes("Redeem amount too low"));
+        issuerWizard.redeem(IChamber(address(chamber)), quantityToRedeem);
+
+        assertEq(chamber.totalSupply(), quantityToMint);
+        assertGe(IERC20(usdc).balanceOf(address(chamber)), requiredUsdcCollateral);
+        assertGe(IERC20(usdc).balanceOf(address(alice)), 0);
+    }
+
     /*//////////////////////////////////////////////////////////////
                               SUCCESS
     //////////////////////////////////////////////////////////////*/
@@ -138,12 +258,12 @@ contract IssuerWizardIntegrationRedeemTest is Test {
         uint256 token1Quantity,
         uint256 token2Quantity
     ) public {
-        vm.assume(quantityToRedeem > 0);
-        vm.assume(quantityToRedeem < type(uint160).max);
         vm.assume(token1Quantity > 0);
-        vm.assume(token1Quantity < type(uint64).max);
+        vm.assume(token1Quantity < 1 ether);
         vm.assume(token2Quantity > 0);
-        vm.assume(token2Quantity < type(uint64).max);
+        vm.assume(token2Quantity < 1 ether);
+        vm.assume(quantityToRedeem > 1 ether);
+        vm.assume(quantityToRedeem < type(uint160).max);
 
         uint256[] memory testQuantities = new uint256[](2);
         testQuantities[0] = token1Quantity;
@@ -165,39 +285,113 @@ contract IssuerWizardIntegrationRedeemTest is Test {
         ERC20(token1).approve(issuerAddress, requiredToken1Collateral);
         vm.prank(alice);
         ERC20(token2).approve(issuerAddress, requiredToken2Collateral);
+
         vm.prank(alice);
         issuerWizard.issue(IChamber(address(chamber)), quantityToRedeem);
-        uint256 previousChamberSupply = chamber.totalSupply();
-        uint256 previousChamberToken1Balance = IERC20(token1).balanceOf(address(chamber));
-        uint256 previousChamberToken2Balance = IERC20(token2).balanceOf(address(chamber));
-        uint256 previousAliceToken1Balance = IERC20(token1).balanceOf(address(alice));
-        uint256 previousAliceToken2Balance = IERC20(token2).balanceOf(address(alice));
-        assertEq(previousChamberSupply, quantityToRedeem);
-        assertEq(previousAliceToken1Balance, 0);
-        assertEq(previousAliceToken2Balance, 0);
-        assertEq(previousChamberToken1Balance, requiredToken1Collateral);
-        assertEq(previousChamberToken2Balance, requiredToken2Collateral);
+
+        assertEq(chamber.totalSupply(), quantityToRedeem);
+        assertEq(IERC20(token1).balanceOf(address(alice)), 0);
+        assertEq(IERC20(token2).balanceOf(address(alice)), 0);
+        assertEq(IERC20(token1).balanceOf(address(chamber)), requiredToken1Collateral);
+        assertEq(IERC20(token2).balanceOf(address(chamber)), requiredToken2Collateral);
         vm.expectEmit(true, true, false, true, address(chamber));
         emit Transfer(alice, address(0x0), quantityToRedeem);
         vm.expectEmit(true, true, false, true, token1);
-        emit Transfer(address(chamber), alice, requiredToken1Collateral);
+        emit Transfer(address(chamber), alice, quantityToRedeem.preciseMul(token1Quantity, 18));
         vm.expectEmit(true, true, false, true, token2);
-        emit Transfer(address(chamber), alice, requiredToken2Collateral);
+        emit Transfer(address(chamber), alice, quantityToRedeem.preciseMul(token2Quantity, 18));
         vm.expectEmit(true, true, false, true, address(issuerWizard));
         emit ChamberTokenRedeemed(address(chamber), alice, quantityToRedeem);
 
         vm.prank(alice);
         issuerWizard.redeem(IChamber(address(chamber)), quantityToRedeem);
 
-        uint256 currentChamberSupply = chamber.totalSupply();
-        uint256 currentChamberToken1Balance = IERC20(token1).balanceOf(address(chamber));
-        uint256 currentChamberToken2Balance = IERC20(token2).balanceOf(address(chamber));
-        uint256 currentAliceToken1Balance = IERC20(token1).balanceOf(address(alice));
-        uint256 currentAliceToken2Balance = IERC20(token2).balanceOf(address(alice));
-        assertEq(currentChamberSupply, 0);
-        assertEq(currentAliceToken1Balance, requiredToken1Collateral);
-        assertEq(currentAliceToken2Balance, requiredToken2Collateral);
-        assertEq(currentChamberToken1Balance, 0);
-        assertEq(currentChamberToken2Balance, 0);
+        assertEq(chamber.totalSupply(), 0);
+        assertGe(
+            IERC20(token1).balanceOf(address(chamber)),
+            quantityToRedeem.preciseMulCeil(token1Quantity, 18)
+                - quantityToRedeem.preciseMul(token1Quantity, 18)
+        );
+        assertGe(
+            IERC20(token2).balanceOf(address(chamber)),
+            quantityToRedeem.preciseMulCeil(token2Quantity, 18)
+                - quantityToRedeem.preciseMul(token2Quantity, 18)
+        );
+        assertGe(
+            IERC20(token1).balanceOf(address(alice)),
+            quantityToRedeem.preciseMul(token1Quantity, 18)
+        );
+        assertGe(
+            IERC20(token2).balanceOf(address(alice)),
+            quantityToRedeem.preciseMul(token2Quantity, 18)
+        );
+    }
+
+    /**
+     * [SUCCESS] All redeems should success because the minting process was legit collateral,
+     * and might have overcollateralization.
+     *
+     * Consider: [1e18 wei] CHAMBER === [1 wei]
+     *
+     * Minting any amount in [1e18, infinite[ will require at least 1 wei of USDC to deposit.
+     *
+     * Redeeming any amount in [1e18/required_USDC, infinite[ will success because at least 1 wei
+     * of USDC is claimable.
+     *
+     * Generalizing, if the required_USDC is < 1e18 per chamber token (1e18 wei), the
+     * limit in which all redeems success is over: (1e18 / required_USDC).
+     *
+     * As 1e18 required_USDC per chamber token equals 1e12 $USDC, most use cases are satisfied,
+     * even with a token that uses 6 decimals.
+     */
+    function testRedeemUSDCWithGeneralMintUseCase(
+        uint256 quantityToMint,
+        uint256 quantityToRedeem,
+        uint256 requiredUsdc
+    ) public {
+        vm.assume(requiredUsdc > 0);
+        vm.assume(requiredUsdc < 1 ether);
+        vm.assume(quantityToMint >= 1 ether);
+        vm.assume(quantityToMint < type(uint128).max);
+        vm.assume(quantityToRedeem > 1 ether / requiredUsdc); // Limit of legit collateral
+        vm.assume(quantityToRedeem <= quantityToMint);
+
+        address[] memory usdcAsConstituent = new address[](1);
+        usdcAsConstituent[0] = usdc;
+        uint256[] memory usdcQuantity = new uint256[](1);
+        usdcQuantity[0] = requiredUsdc;
+        uint256 requiredUsdcCollateral = quantityToMint.preciseMulCeil(requiredUsdc, 18);
+
+        deal(usdc, alice, requiredUsdcCollateral);
+        assertEq(IERC20(usdc).balanceOf(address(alice)), requiredUsdcCollateral);
+
+        Chamber chamber = Chamber(
+            chamberGod.createChamber(
+                "name", "symbol", usdcAsConstituent, usdcQuantity, wizards, managers
+            )
+        );
+        vm.prank(alice);
+        ERC20(usdc).approve(issuerAddress, requiredUsdcCollateral);
+
+        // This is not a forced mint, at least 1e18 chamber tokens will be collaterizaed in a legit manner, while the rest is a combination of
+        // legit collateralization and overcollateralization
+        vm.prank(alice);
+        issuerWizard.issue(IChamber(address(chamber)), quantityToMint);
+        assertEq(chamber.totalSupply(), quantityToMint);
+        assertEq(IERC20(usdc).balanceOf(address(alice)), 0);
+        assertEq(IERC20(usdc).balanceOf(address(chamber)), requiredUsdcCollateral);
+
+        // Every redeem will pass, as the user will be able to get some USDC out
+        vm.prank(alice);
+        issuerWizard.redeem(IChamber(address(chamber)), quantityToRedeem);
+
+        assertEq(chamber.totalSupply(), quantityToMint - quantityToRedeem);
+        assertEq(
+            IERC20(usdc).balanceOf(address(chamber)),
+            requiredUsdcCollateral - quantityToRedeem.preciseMul(requiredUsdc, 18)
+        );
+        assertEq(
+            IERC20(usdc).balanceOf(address(alice)), quantityToRedeem.preciseMul(requiredUsdc, 18)
+        );
     }
 }

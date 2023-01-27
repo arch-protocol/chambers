@@ -67,12 +67,12 @@ contract IssuerWizard is IIssuerWizard, ReentrancyGuard {
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * Returns the amount of tokens required
+     * Returns the amount of tokens required for mint
      *
      * @param _chamber  Chamber instance
-     * @param _quantity Amount of Chamber tokens to be minted
+     * @param _mintQuantity Amount of Chamber tokens to be minted
      */
-    function getConstituentsQuantitiesForIssuance(IChamber _chamber, uint256 _quantity)
+    function getConstituentsQuantitiesForIssuance(IChamber _chamber, uint256 _mintQuantity)
         public
         view
         returns (address[] memory, uint256[] memory)
@@ -84,7 +84,31 @@ contract IssuerWizard is IIssuerWizard, ReentrancyGuard {
 
         for (uint256 i = 0; i < _numberOfConstituents; i++) {
             _requiredConstituentsQuantities[i] = _chamber.getConstituentQuantity(_constituents[i])
-                .preciseMulCeil(_quantity, chamberDecimals);
+                .preciseMulCeil(_mintQuantity, chamberDecimals);
+        }
+        return (_constituents, _requiredConstituentsQuantities);
+    }
+
+    /**
+     * Returns the amount of tokens returned for redeem
+     *
+     * @param _chamber  Chamber instance
+     * @param _redeemQuantity Amount of Chamber tokens to be redeemed
+     */
+    function getConstituentsQuantitiesForRedeem(IChamber _chamber, uint256 _redeemQuantity)
+        public
+        view
+        returns (address[] memory, uint256[] memory)
+    {
+        address[] memory _constituents = _chamber.getConstituentsAddresses();
+        uint256 _numberOfConstituents = _constituents.length;
+        uint256[] memory _requiredConstituentsQuantities = new uint256[](_numberOfConstituents);
+        uint256 chamberDecimals = ERC20(address(_chamber)).decimals();
+
+        for (uint256 i = 0; i < _numberOfConstituents; i++) {
+            _requiredConstituentsQuantities[i] = _chamber.getConstituentQuantity(_constituents[i])
+                .preciseMul(_redeemQuantity, chamberDecimals);
+            require(_requiredConstituentsQuantities[i] > 0, "Redeem amount too low");
         }
         return (_constituents, _requiredConstituentsQuantities);
     }
@@ -131,7 +155,7 @@ contract IssuerWizard is IIssuerWizard, ReentrancyGuard {
         _chamber.burn(msg.sender, _quantity);
 
         (address[] memory _constituents, uint256[] memory _requiredConstituentsQuantities) =
-            getConstituentsQuantitiesForIssuance(_chamber, _quantity);
+            getConstituentsQuantitiesForRedeem(_chamber, _quantity);
 
         for (uint256 i = 0; i < _constituents.length; i++) {
             address constituent = _constituents[i];
