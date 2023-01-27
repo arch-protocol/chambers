@@ -89,9 +89,9 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
 
     modifier chambersNonReentrant() virtual {
         require(chamberLockState == ChamberState.UNLOCKED, "Non reentrancy allowed");
-        chamberLockState = ChamberState.UNLOCKED;
-        _;
         chamberLockState = ChamberState.LOCKED;
+        _;
+        chamberLockState = ChamberState.UNLOCKED;
     }
 
     /*//////////////////////////////////////////////////////////////
