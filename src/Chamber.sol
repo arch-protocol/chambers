@@ -69,7 +69,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
 
     address[] public allowedContracts;
 
-    uint8 private chamberLocked = 1;
+    ChamberState private chamberLockState = ChamberState.UNLOCKED;
 
     /*//////////////////////////////////////////////////////////////
                                 MODIFIERS
@@ -88,10 +88,10 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
     }
 
     modifier chambersNonReentrant() virtual {
-        require(chamberLocked == 1, "Non reentrancy allowed");
-        chamberLocked = 2;
+        require(chamberLockState == ChamberState.UNLOCKED, "Non reentrancy allowed");
+        chamberLockState = ChamberState.UNLOCKED;
         _;
-        chamberLocked = 1;
+        chamberLockState = ChamberState.LOCKED;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -377,8 +377,8 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
      * that were not created by arch-protocol
      */
     function lockChamber() external onlyWizard nonReentrant {
-        require(chamberLocked == 1, "Chamber locked");
-        chamberLocked = 2;
+        require(chamberLockState == ChamberState.UNLOCKED, "Chamber locked");
+        chamberLockState = ChamberState.LOCKED;
     }
 
     /**
@@ -386,8 +386,8 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
      * that were not created by arch-protocol
      */
     function unlockChamber() external onlyWizard nonReentrant {
-        require(chamberLocked == 2, "Chamber already unlocked");
-        chamberLocked = 1;
+        require(chamberLockState == ChamberState.LOCKED, "Chamber already unlocked");
+        chamberLockState = ChamberState.UNLOCKED;
     }
 
     /**
