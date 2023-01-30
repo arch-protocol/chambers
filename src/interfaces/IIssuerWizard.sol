@@ -25,6 +25,19 @@
  *     All changes made by Smash Works Inc. are described and documented at
  *
  *     https://docs.arch.finance/chambers
+ *
+ *
+ *             %@@@@@
+ *          @@@@@@@@@@@
+ *        #@@@@@     @@@           @@                   @@
+ *       @@@@@@       @@@         @@@@                  @@
+ *      @@@@@@         @@        @@  @@    @@@@@ @@@@@  @@@*@@
+ *     .@@@@@          @@@      @@@@@@@@   @@    @@     @@  @@
+ *     @@@@@(       (((((      @@@    @@@  @@    @@@@@  @@  @@
+ *    @@@@@@   (((((((
+ *    @@@@@#(((((((
+ *    @@@@@(((((
+ *      @@@((
  */
 pragma solidity ^0.8.17.0;
 
@@ -45,7 +58,12 @@ interface IIssuerWizard {
                                 FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-    function getConstituentsQuantitiesForIssuance(IChamber chamber, uint256 quantity)
+    function getConstituentsQuantitiesForIssuance(IChamber chamber, uint256 mintQuantity)
+        external
+        view
+        returns (address[] memory, uint256[] memory);
+
+    function getConstituentsQuantitiesForRedeem(IChamber chamber, uint256 redeemQuantity)
         external
         view
         returns (address[] memory, uint256[] memory);

@@ -25,6 +25,19 @@
  *     All changes made by Smash Works Inc. are described and documented at
  *
  *     https://docs.arch.finance/chambers
+ *
+ *
+ *             %@@@@@
+ *          @@@@@@@@@@@
+ *        #@@@@@     @@@           @@                   @@
+ *       @@@@@@       @@@         @@@@                  @@
+ *      @@@@@@         @@        @@  @@    @@@@@ @@@@@  @@@*@@
+ *     .@@@@@          @@@      @@@@@@@@   @@    @@     @@  @@
+ *     @@@@@(       (((((      @@@    @@@  @@    @@@@@  @@  @@
+ *    @@@@@@   (((((((
+ *    @@@@@#(((((((
+ *    @@@@@(((((
+ *      @@@((
  */
 pragma solidity ^0.8.17.0;
 
@@ -41,6 +54,7 @@ interface IRebalanceWizard {
         uint256 _sellQuantity;
         address _buyToken;
         uint256 _minBuyQuantity;
+        address _allowanceTarget;
         address payable _target;
         bytes _data;
     }

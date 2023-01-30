@@ -25,6 +25,19 @@
  *     All changes made by Smash Works Inc. are described and documented at
  *
  *     https://docs.arch.finance/chambers
+ *
+ *
+ *             %@@@@@
+ *          @@@@@@@@@@@
+ *        #@@@@@     @@@           @@                   @@
+ *       @@@@@@       @@@         @@@@                  @@
+ *      @@@@@@         @@        @@  @@    @@@@@ @@@@@  @@@*@@
+ *     .@@@@@          @@@      @@@@@@@@   @@    @@     @@  @@
+ *     @@@@@(       (((((      @@@    @@@  @@    @@@@@  @@  @@
+ *    @@@@@@   (((((((
+ *    @@@@@#(((((((
+ *    @@@@@(((((
+ *      @@@((
  */
 pragma solidity ^0.8.17.0;
 
@@ -93,7 +106,8 @@ contract RebalanceWizard is ReentrancyGuard, IRebalanceWizard {
             params._buyToken,
             params._minBuyQuantity,
             params._data,
-            params._target
+            params._target,
+            params._allowanceTarget
         );
 
         params._chamber.updateQuantities();

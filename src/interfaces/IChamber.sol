@@ -25,10 +25,32 @@
  *     All changes made by Smash Works Inc. are described and documented at
  *
  *     https://docs.arch.finance/chambers
+ *
+ *
+ *             %@@@@@
+ *          @@@@@@@@@@@
+ *        #@@@@@     @@@           @@                   @@
+ *       @@@@@@       @@@         @@@@                  @@
+ *      @@@@@@         @@        @@  @@    @@@@@ @@@@@  @@@*@@
+ *     .@@@@@          @@@      @@@@@@@@   @@    @@     @@  @@
+ *     @@@@@(       (((((      @@@    @@@  @@    @@@@@  @@  @@
+ *    @@@@@@   (((((((
+ *    @@@@@#(((((((
+ *    @@@@@(((((
+ *      @@@((
  */
 pragma solidity ^0.8.17.0;
 
 interface IChamber {
+    /*//////////////////////////////////////////////////////////////
+                                 ENUMS
+    //////////////////////////////////////////////////////////////*/
+
+    enum ChamberState {
+        LOCKED,
+        UNLOCKED
+    }
+
     /*//////////////////////////////////////////////////////////////
                                  EVENTS
     //////////////////////////////////////////////////////////////*/
@@ -107,6 +129,7 @@ interface IChamber {
         address _buyToken,
         uint256 _minBuyQuantity,
         bytes memory _data,
-        address payable _target
+        address payable _target,
+        address _allowanceTarget
     ) external returns (uint256 tokenAmountBought);
 }
