@@ -30,7 +30,7 @@ contract ERC20WithCallback is ERC20("", "") {
  * This contract is called by the ERC20WithCallback contract and will try to perform an attack.
  */
 
-contract HackyWacky {
+contract MaliciousContract {
     StreamingFeeWizard feeWiz;
     Chamber chamber;
 
@@ -97,7 +97,7 @@ contract Reentrancy is Test {
      * while issuing new tokens at the issuerWizard.
      */
     function testIssueReentrancy() public {
-        HackyWacky callback = new HackyWacky(streamingFee);
+        MaliciousContract callback = new MaliciousContract(streamingFee);
         ERC20WithCallback callbackToken = new ERC20WithCallback(address(callback));
 
         address[] memory constituents = new address[](1);
@@ -193,7 +193,7 @@ contract Reentrancy is Test {
      * will be locked while redeeming tokens at the issuerWizard.
      */
     function testRedeemReentrancy() public {
-        HackyWacky callback = new HackyWacky(streamingFee);
+        MaliciousContract callback = new MaliciousContract(streamingFee);
         ERC20WithCallback callbackToken = new ERC20WithCallback(address(callback));
 
         address[] memory constituents = new address[](2);

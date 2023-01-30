@@ -1,4 +1,4 @@
-name: Chamber Audit Pocs Tests
+name: Chamber Edge Cases Tests
 
 on:
   push:
@@ -10,5 +10,5 @@ jobs:
   audit-pocs-tests-chamber:
     uses: ./.github/workflows/tests-template.yml
     with:
-      make-command: test-audit-pocs-mainnet-fork
+      make-command: test-edge-cases-mainnet-fork
     secrets: inherit
