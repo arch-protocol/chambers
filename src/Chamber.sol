@@ -428,13 +428,10 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
      *
      */
     function updateQuantities() external onlyWizard nonReentrant chambersNonReentrant {
-        uint256 _totalSupply = totalSupply;
-        uint256 _decimals = decimals;
         for (uint256 i = 0; i < constituents.length; i++) {
             address _constituent = constituents[i];
-
             uint256 currentBalance = IERC20(_constituent).balanceOf(address(this));
-            uint256 _newQuantity = currentBalance.preciseDiv(_totalSupply, _decimals);
+            uint256 _newQuantity = currentBalance.preciseDiv(totalSupply, decimals);
 
             require(_newQuantity > 0, "Zero quantity not allowed");
 
