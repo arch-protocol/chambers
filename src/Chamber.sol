@@ -472,7 +472,6 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
         address _buyToken,
         uint256 _minBuyQuantity,
         bytes memory _data,
-        address payable _target
         address payable _target,
         address _allowanceTarget
     ) external onlyWizard nonReentrant returns (uint256 tokenAmountBought) {
