@@ -303,12 +303,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
      * @return address[] Array containing the addresses of the wizards of the Chamber
      */
     function getWizards() external view returns (address[] memory) {
-        uint256 _totalWizards = wizards.length();
-        address[] memory _wizards = new address[](_totalWizards);
-        for (uint256 i = 0; i < _totalWizards; i++) {
-            _wizards[i] = wizards.at(i);
-        }
-        return _wizards;
+        return wizards.values();
     }
 
     /**
@@ -317,12 +312,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
      * @return address[] Array containing the addresses of the managers of the Chamber
      */
     function getManagers() external view returns (address[] memory) {
-        uint256 _totalManagers = managers.length();
-        address[] memory _managers = new address[](_totalManagers);
-        for (uint256 i = 0; i < _totalManagers; i++) {
-            _managers[i] = managers.at(i);
-        }
-        return _managers;
+        return managers.values();
     }
 
     /**
@@ -331,12 +321,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
      * @return address[] Array containing the addresses of the allowedContracts of the Chamber
      */
     function getAllowedContracts() external view returns (address[] memory) {
-        uint256 _totalAllowedContracts = allowedContracts.length();
-        address[] memory _allowedContracts = new address[](_totalAllowedContracts);
-        for (uint256 i = 0; i < _totalAllowedContracts; i++) {
-            _allowedContracts[i] = allowedContracts.at(i);
-        }
-        return _allowedContracts;
+        return allowedContracts.values();
     }
 
     /**

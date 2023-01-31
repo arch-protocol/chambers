@@ -134,12 +134,7 @@ contract ChamberGod is IChamberGod, Owned, ReentrancyGuard {
      * @return address[]      An address array containing the Wizards
      */
     function getWizards() external view returns (address[] memory) {
-        uint256 _totalWizards = wizards.length();
-        address[] memory _wizards = new address[](_totalWizards);
-        for (uint256 i = 0; i < _totalWizards; i++) {
-            _wizards[i] = wizards.at(i);
-        }
-        return _wizards;
+        return wizards.values();
     }
 
     /**
@@ -148,12 +143,7 @@ contract ChamberGod is IChamberGod, Owned, ReentrancyGuard {
      * @return address[]      An address array containing the Chambers
      */
     function getChambers() external view returns (address[] memory) {
-        uint256 _totalChambers = chambers.length();
-        address[] memory _chambers = new address[](_totalChambers);
-        for (uint256 i = 0; i < _totalChambers; i++) {
-            _chambers[i] = chambers.at(i);
-        }
-        return _chambers;
+        return chambers.values();
     }
 
     /**
@@ -211,12 +201,7 @@ contract ChamberGod is IChamberGod, Owned, ReentrancyGuard {
      * @return address[]      An address array containing the allowed contracts
      */
     function getAllowedContracts() external view returns (address[] memory) {
-        uint256 _totalAllowedContracts = allowedContracts.length();
-        address[] memory _allowedContracts = new address[](_totalAllowedContracts);
-        for (uint256 i = 0; i < _totalAllowedContracts; i++) {
-            _allowedContracts[i] = allowedContracts.at(i);
-        }
-        return _allowedContracts;
+        return allowedContracts.values();
     }
 
     /**
