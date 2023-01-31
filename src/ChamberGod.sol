@@ -43,6 +43,7 @@ pragma solidity ^0.8.17.0;
 
 import {Owned} from "solmate/auth/Owned.sol";
 import {ReentrancyGuard} from "solmate/utils/ReentrancyGuard.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {ArrayUtils} from "./lib/ArrayUtils.sol";
 import {Chamber} from "./Chamber.sol";
 import {IChamberGod} from "./interfaces/IChamberGod.sol";
@@ -53,16 +54,15 @@ contract ChamberGod is IChamberGod, Owned, ReentrancyGuard {
     //////////////////////////////////////////////////////////////*/
 
     using ArrayUtils for address[];
+    using EnumerableSet for EnumerableSet.AddressSet;
 
     /*//////////////////////////////////////////////////////////////
                               GOD STORAGE
     //////////////////////////////////////////////////////////////*/
 
-    address[] public chambers;
-
-    address[] public wizards;
-
-    address[] public allowedContracts;
+    EnumerableSet.AddressSet private chambers;
+    EnumerableSet.AddressSet private wizards;
+    EnumerableSet.AddressSet private allowedContracts;
 
     /*//////////////////////////////////////////////////////////////
                                CONSTRUCTOR
@@ -121,7 +121,7 @@ contract ChamberGod is IChamberGod, Owned, ReentrancyGuard {
           _managers
         );
 
-        chambers.push(address(chamber));
+        chambers.add(address(chamber));
 
         emit ChamberCreated(address(chamber), msg.sender, _name, _symbol);
 
@@ -134,7 +134,12 @@ contract ChamberGod is IChamberGod, Owned, ReentrancyGuard {
      * @return address[]      An address array containing the Wizards
      */
     function getWizards() external view returns (address[] memory) {
-        return wizards;
+        uint256 _totalWizards = wizards.length();
+        address[] memory _wizards = new address[](_totalWizards);
+        for (uint256 i = 0; i < _totalWizards; i++) {
+            _wizards[i] = wizards.at(i);
+        }
+        return _wizards;
     }
 
     /**
@@ -143,7 +148,12 @@ contract ChamberGod is IChamberGod, Owned, ReentrancyGuard {
      * @return address[]      An address array containing the Chambers
      */
     function getChambers() external view returns (address[] memory) {
-        return chambers;
+        uint256 _totalChambers = chambers.length();
+        address[] memory _chambers = new address[](_totalChambers);
+        for (uint256 i = 0; i < _totalChambers; i++) {
+            _chambers[i] = chambers.at(i);
+        }
+        return _chambers;
     }
 
     /**
@@ -177,7 +187,7 @@ contract ChamberGod is IChamberGod, Owned, ReentrancyGuard {
         require(_wizard != address(0), "Must be a valid wizard");
         require(!isWizard(address(_wizard)), "Wizard already in ChamberGod");
 
-        wizards.push(_wizard);
+        wizards.add(_wizard);
 
         emit WizardAdded(_wizard);
     }
@@ -190,7 +200,7 @@ contract ChamberGod is IChamberGod, Owned, ReentrancyGuard {
     function removeWizard(address _wizard) external onlyOwner nonReentrant {
         require(isWizard(_wizard), "Wizard not valid");
 
-        wizards.removeStorage(_wizard);
+        wizards.remove(_wizard);
 
         emit WizardRemoved(_wizard);
     }
@@ -201,7 +211,12 @@ contract ChamberGod is IChamberGod, Owned, ReentrancyGuard {
      * @return address[]      An address array containing the allowed contracts
      */
     function getAllowedContracts() external view returns (address[] memory) {
-        return allowedContracts;
+        uint256 _totalAllowedContracts = allowedContracts.length();
+        address[] memory _allowedContracts = new address[](_totalAllowedContracts);
+        for (uint256 i = 0; i < _totalAllowedContracts; i++) {
+            _allowedContracts[i] = allowedContracts.at(i);
+        }
+        return _allowedContracts;
     }
 
     /**
@@ -212,7 +227,7 @@ contract ChamberGod is IChamberGod, Owned, ReentrancyGuard {
     function addAllowedContract(address _target) external onlyOwner nonReentrant {
         require(!isAllowedContract(_target), "Contract already allowed");
 
-        allowedContracts.push(_target);
+        allowedContracts.add(_target);
 
         emit AllowedContractAdded(_target);
     }
@@ -225,7 +240,7 @@ contract ChamberGod is IChamberGod, Owned, ReentrancyGuard {
     function removeAllowedContract(address _target) external onlyOwner nonReentrant {
         require(isAllowedContract(_target), "Contract not allowed");
 
-        allowedContracts.removeStorage(_target);
+        allowedContracts.remove(_target);
 
         emit AllowedContractRemoved(_target);
     }
