@@ -15,15 +15,15 @@ import {console} from "forge-std/console.sol";
  * It will be used to perform a phishing attack attempt.
  */
 contract FakeChamber {
-    function mint(address, uint256) external {
+    function mint(address, uint256) external pure {
         return;
     }
 
-    function decimals() external view returns (uint8) {
+    function decimals() external pure returns (uint8) {
         return 18;
     }
 
-    function getConstituentsAddresses() external view returns (address[] memory) {
+    function getConstituentsAddresses() external pure returns (address[] memory) {
         address[] memory constituents = new address[](1);
 
         // USDC
@@ -32,7 +32,7 @@ contract FakeChamber {
         return constituents;
     }
 
-    function getConstituentQuantity(address) external view returns (uint256) {
+    function getConstituentQuantity(address) external pure returns (uint256) {
         return 1e18;
     }
 }
@@ -110,17 +110,16 @@ contract ChambersTest is Test {
     function testCannotIssueFakeChamber() public {
         FakeChamber fakeChamber = new FakeChamber();
 
-        //[ARCH] save Bob's USDC balance to check after the phishing attempt.
-        uint256 bobBalanceBeforePhishingAttempt = USDC.balanceOf(address(bob));
-
         vm.startPrank(bob);
 
         // Bob approves the issuer to use all USDC tokens
         USDC.approve(address(issuer), type(uint256).max);
         // Bob deposits into a legit chamber
         issuer.issue(chamber, 1e6);
-        // Bob is the target of a phishing attack that makes him interact with a fake malicious
-        // chamber
+        //[ARCH] Save Bob's USDC balance to check after the phishing attempt.
+        uint256 bobBalanceBeforePhishingAttempt = USDC.balanceOf(address(bob));
+
+        // Bob is the target of a phishing attack that makes him interact with a fake chamber
 
         //[ARCH] Should revert now because fakeChamber was not created by ChamberGod
         vm.expectRevert("Chamber invalid");
@@ -128,12 +127,13 @@ contract ChambersTest is Test {
 
         vm.stopPrank();
 
-        // The fake chamber stole Bob's tokens
         // Depending on the implementation of `FakeChamber.getConstituentQuantity`, all USDC could
-        // be stolen from Bob
+        // be stolen from Bob. But as issue checks that chambers must be created with chamber god,
+        // it is not allowed anymore
 
         //[ARCH] Check that Assets were not stolen
         assertEq(USDC.balanceOf(address(fakeChamber)), 0);
+        assertEq(USDC.balanceOf(address(bob)), bobBalanceBeforePhishingAttempt);
 
         console.log("Bob USDC balance", USDC.balanceOf(address(bob)));
         console.log("Issuer", USDC.balanceOf(address(fakeChamber)));
