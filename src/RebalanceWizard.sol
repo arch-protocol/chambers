@@ -45,7 +45,6 @@ import {IChamber} from "./interfaces/IChamber.sol";
 import {ReentrancyGuard} from "solmate/utils/ReentrancyGuard.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {ArrayUtils} from "./lib/ArrayUtils.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IRebalanceWizard} from "./interfaces/IRebalanceWizard.sol";
 
@@ -55,7 +54,6 @@ contract RebalanceWizard is ReentrancyGuard, IRebalanceWizard {
     //////////////////////////////////////////////////////////////*/
 
     using SafeERC20 for IERC20;
-    using ArrayUtils for address[];
     using Address for address;
 
     /*//////////////////////////////////////////////////////////////
