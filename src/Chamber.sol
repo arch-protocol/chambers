@@ -133,11 +133,11 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
         god = IChamberGod(msg.sender);
 
         for (uint256 i = 0; i < _wizards.length; i++) {
-            wizards.add(_wizards[i]);
+            require(wizards.add(_wizards[i]), "Cannot add wizard");
         }
 
         for (uint256 i = 0; i < _managers.length; i++) {
-            managers.add(_managers[i]);
+            require(managers.add(_managers[i]), "Cannot add manager");
         }
 
         for (uint256 j = 0; j < _constituents.length; j++) {
@@ -216,7 +216,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
         require(!isManager(_manager), "Already manager");
         require(_manager != address(0), "Cannot add null address");
 
-        managers.add(_manager);
+        require(managers.add(_manager), "Cannot add manager");
 
         emit ManagerAdded(_manager);
     }
@@ -229,7 +229,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
     function removeManager(address _manager) external onlyOwner nonReentrant {
         require(isManager(_manager), "Not a manager");
 
-        managers.remove(_manager);
+        require(managers.remove(_manager), "Cannot remove manager");
 
         emit ManagerRemoved(_manager);
     }
@@ -243,7 +243,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
         require(god.isWizard(_wizard), "Wizard not validated in ChamberGod");
         require(!isWizard(_wizard), "Wizard already in Chamber");
 
-        wizards.add(_wizard);
+        require(wizards.add(_wizard), "Cannot add wizard");
 
         emit WizardAdded(_wizard);
     }
@@ -256,7 +256,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
     function removeWizard(address _wizard) external onlyManager nonReentrant {
         require(isWizard(_wizard), "Wizard not in chamber");
 
-        wizards.remove(_wizard);
+        require(wizards.remove(_wizard), "Cannot remove wizard");
 
         emit WizardRemoved(_wizard);
     }
@@ -333,7 +333,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
         require(god.isAllowedContract(_target), "Contract not allowed in ChamberGod");
         require(!isAllowedContract(_target), "Contract already allowed");
 
-        allowedContracts.add(_target);
+        require(allowedContracts.add(_target), "Cannot add contract");
 
         emit AllowedContractAdded(_target);
     }
@@ -346,7 +346,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
     function removeAllowedContract(address _target) external onlyManager nonReentrant {
         require(isAllowedContract(_target), "Contract not allowed");
 
-        allowedContracts.remove(_target);
+        require(allowedContracts.remove(_target), "Cannot remove contract");
 
         emit AllowedContractRemoved(_target);
     }

@@ -121,7 +121,7 @@ contract ChamberGod is IChamberGod, Owned, ReentrancyGuard {
           _managers
         );
 
-        chambers.add(address(chamber));
+        require(chambers.add(address(chamber)), "Cannot add chamber");
 
         emit ChamberCreated(address(chamber), msg.sender, _name, _symbol);
 
@@ -177,7 +177,7 @@ contract ChamberGod is IChamberGod, Owned, ReentrancyGuard {
         require(_wizard != address(0), "Must be a valid wizard");
         require(!isWizard(address(_wizard)), "Wizard already in ChamberGod");
 
-        wizards.add(_wizard);
+        require(wizards.add(_wizard), "Cannot add wizard");
 
         emit WizardAdded(_wizard);
     }
@@ -190,7 +190,7 @@ contract ChamberGod is IChamberGod, Owned, ReentrancyGuard {
     function removeWizard(address _wizard) external onlyOwner nonReentrant {
         require(isWizard(_wizard), "Wizard not valid");
 
-        wizards.remove(_wizard);
+        require(wizards.remove(_wizard), "Cannot remove wizard");
 
         emit WizardRemoved(_wizard);
     }
@@ -212,7 +212,7 @@ contract ChamberGod is IChamberGod, Owned, ReentrancyGuard {
     function addAllowedContract(address _target) external onlyOwner nonReentrant {
         require(!isAllowedContract(_target), "Contract already allowed");
 
-        allowedContracts.add(_target);
+        require(allowedContracts.add(_target), "Cannot add contract");
 
         emit AllowedContractAdded(_target);
     }
@@ -225,7 +225,7 @@ contract ChamberGod is IChamberGod, Owned, ReentrancyGuard {
     function removeAllowedContract(address _target) external onlyOwner nonReentrant {
         require(isAllowedContract(_target), "Contract not allowed");
 
-        allowedContracts.remove(_target);
+        require(allowedContracts.remove(_target), "Cannot remove contract");
 
         emit AllowedContractRemoved(_target);
     }
