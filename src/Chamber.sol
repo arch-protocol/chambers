@@ -46,6 +46,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {Owned} from "solmate/auth/Owned.sol";
 import {ReentrancyGuard} from "solmate/utils/ReentrancyGuard.sol";
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {ArrayUtils} from "./lib/ArrayUtils.sol";
 import {IChamberGod} from "./interfaces/IChamberGod.sol";
 import {IChamber} from "./interfaces/IChamber.sol";
@@ -64,6 +65,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
     //////////////////////////////////////////////////////////////*/
 
     using ArrayUtils for address[];
+    using EnumerableSet for EnumerableSet.AddressSet;
     using SafeERC20 for IERC20;
     using Address for address;
     using PreciseUnitMath for uint256;
@@ -76,11 +78,9 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
 
     mapping(address => uint256) public constituentQuantities;
 
-    address[] public wizards;
-
-    address[] public managers;
-
-    address[] public allowedContracts;
+    EnumerableSet.AddressSet private wizards;
+    EnumerableSet.AddressSet private managers;
+    EnumerableSet.AddressSet private allowedContracts;
 
     ChamberState private chamberLockState = ChamberState.UNLOCKED;
 
@@ -130,11 +130,14 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
         address[] memory _managers
     ) Owned(_owner) ERC20(_name, _symbol, 18) {
         constituents = _constituents;
-        wizards = _wizards;
         god = IChamberGod(msg.sender);
 
+        for (uint256 i = 0; i < _wizards.length; i++) {
+            wizards.add(_wizards[i]);
+        }
+
         for (uint256 i = 0; i < _managers.length; i++) {
-            managers.push(_managers[i]);
+            managers.add(_managers[i]);
         }
 
         for (uint256 j = 0; j < _constituents.length; j++) {
@@ -213,7 +216,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
         require(!isManager(_manager), "Already manager");
         require(_manager != address(0), "Cannot add null address");
 
-        managers.push(_manager);
+        managers.add(_manager);
 
         emit ManagerAdded(_manager);
     }
@@ -226,7 +229,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
     function removeManager(address _manager) external onlyOwner nonReentrant {
         require(isManager(_manager), "Not a manager");
 
-        managers.removeStorage(_manager);
+        managers.remove(_manager);
 
         emit ManagerRemoved(_manager);
     }
@@ -240,7 +243,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
         require(god.isWizard(_wizard), "Wizard not validated in ChamberGod");
         require(!isWizard(_wizard), "Wizard already in Chamber");
 
-        wizards.push(_wizard);
+        wizards.add(_wizard);
 
         emit WizardAdded(_wizard);
     }
@@ -253,7 +256,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
     function removeWizard(address _wizard) external onlyManager nonReentrant {
         require(isWizard(_wizard), "Wizard not in chamber");
 
-        wizards.removeStorage(_wizard);
+        wizards.remove(_wizard);
 
         emit WizardRemoved(_wizard);
     }
@@ -300,7 +303,12 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
      * @return address[] Array containing the addresses of the wizards of the Chamber
      */
     function getWizards() external view returns (address[] memory) {
-        return wizards;
+        uint256 _totalWizards = wizards.length();
+        address[] memory _wizards = new address[](_totalWizards);
+        for (uint256 i = 0; i < _totalWizards; i++) {
+            _wizards[i] = wizards.at(i);
+        }
+        return _wizards;
     }
 
     /**
@@ -309,7 +317,12 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
      * @return address[] Array containing the addresses of the managers of the Chamber
      */
     function getManagers() external view returns (address[] memory) {
-        return managers;
+        uint256 _totalManagers = managers.length();
+        address[] memory _managers = new address[](_totalManagers);
+        for (uint256 i = 0; i < _totalManagers; i++) {
+            _managers[i] = managers.at(i);
+        }
+        return _managers;
     }
 
     /**
@@ -318,7 +331,12 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
      * @return address[] Array containing the addresses of the allowedContracts of the Chamber
      */
     function getAllowedContracts() external view returns (address[] memory) {
-        return allowedContracts;
+        uint256 _totalAllowedContracts = allowedContracts.length();
+        address[] memory _allowedContracts = new address[](_totalAllowedContracts);
+        for (uint256 i = 0; i < _totalAllowedContracts; i++) {
+            _allowedContracts[i] = allowedContracts.at(i);
+        }
+        return _allowedContracts;
     }
 
     /**
@@ -330,7 +348,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
         require(god.isAllowedContract(_target), "Contract not allowed in ChamberGod");
         require(!isAllowedContract(_target), "Contract already allowed");
 
-        allowedContracts.push(_target);
+        allowedContracts.add(_target);
 
         emit AllowedContractAdded(_target);
     }
@@ -343,7 +361,7 @@ contract Chamber is IChamber, Owned, ReentrancyGuard, ERC20 {
     function removeAllowedContract(address _target) external onlyManager nonReentrant {
         require(isAllowedContract(_target), "Contract not allowed");
 
-        allowedContracts.removeStorage(_target);
+        allowedContracts.remove(_target);
 
         emit AllowedContractRemoved(_target);
     }
